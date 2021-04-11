@@ -1163,7 +1163,7 @@ def gt_optimal_mixed_strategy_lp(A,P,params,election_ID,printing_wanted=False):
     print(indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)")
     lp_x = game_cvxopt.lp_solver(M)
     print_optimal_mixed_strategy(A,lp_x,printing_wanted)
-
+    #print(lp_x)
     return lp_x
 
 def non_uniform_picker(x,L,params):
@@ -1347,7 +1347,7 @@ def runoff(fname,f,gname,g,printing_wanted=True):
     params = None                    # no special ballot treatment
     condorcet_OK = True              # if True, proceed even if there is a Condorcet winner
 
-    A = list(string.upper[:m])   # candidates are A B C ...
+    A = list(string.ascii_uppercase[:m])   # candidates are A B C ...
     setup_TB(A,params)               # setup tie-breaker values
     if printing_wanted:
         print("Number of candidates =",m)
@@ -1375,6 +1375,18 @@ def runoff(fname,f,gname,g,printing_wanted=True):
         print_profile(P,election_ID)
         x = g(A,P,params,election_ID,printing_wanted=True)         # typically GT
         y = f(A,P,params,election_ID,printing_wanted=True)         # other method
+        idx = -1
+
+        for i in y:
+            print(i)
+            if i==1:
+                idx = i
+                break
+
+        if fname == "Borda":
+            y = chr(ord('@') + idx)
+        print(prefs)
+        print((x,y))
         N_xy += prefs[(x,y)]
         N_yx += prefs[(y,x)]
         print("Trial {}: Total number preferring {} over {} = {}," \
@@ -1412,7 +1424,7 @@ def compare_methods(qs, printing_wanted=True):
     """
     election_ID = "compare"
     m = 5                            # number of candidates
-    trials = 10000                  # number of simulated elections
+    trials = 1000                  # number of simulated elections
     ballot_count = 100               # ballots per simulated election
     ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
