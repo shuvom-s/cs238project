@@ -71,8 +71,8 @@ def print_alternatives(A,election_ID):
     """
     Print out list of candidates, nicely, in sorted order.
     """
-    print "%s: Alternatives:"%election_ID
-    print indent+string.join([str(alt) for alt in sorted(A)])
+    print("{}: Alternatives:".format(election_ID))
+    print(indent+string.join([str(alt) for alt in sorted(A)]))
 
 ########################################################################################
 ### BALLOTS (TUPLES OF CANDIDATES)
@@ -216,7 +216,8 @@ def ballots_for(B,c,elim):
     ans = []
     for ballot in B:
         filtered_ballot = filter( lambda x: x != "=" and x not in elim, ballot)
-        if len(filtered_ballot)>0 and filtered_ballot[0] == c:
+        #print(len(list(filtered_ballot)))
+        if len(list(filtered_ballot))>0 and list(filtered_ballot)[0] == c:
             ans.append(ballot)
     return ans
 
@@ -266,12 +267,12 @@ def print_first_choice_counts(A,P,election_ID):
     """
     Print out a line containing the first choice counts for each candidate.
     """
-    print "%s: Count of number of times each candidate was given as first choice."%election_ID
+    print("{}: Count of number of times each candidate was given as first choice.".format(election_ID))
     L = first_choice_counts(A,P)
     line = indent
     for (cnt,a) in L:
-        line = line + "%s (%d) "%(a,cnt)
-    print line
+        line = line + "{} ({}) ".format(a,cnt)
+    print(line)
 
 def parse_ballot_line(line):
     """
@@ -291,14 +292,14 @@ def parse_ballot_line(line):
     for word in line:                    # note that word can't be empty string here
         if word[0] == "(":               # (count)
             if word[-1]!=")":
-                print "Illegal count field %s in line %s"%(word,line)
+                print("Illegal count field {} in line {}".format(word,line))
                 sys.exit()
             count = int(word[1:-1])
         else:
             ballot += [word]             # candidate
     ballot = tuple(ballot)
     if not ballot_OK(ballot):
-        print "Illegal ballot:",line
+        print("Illegal ballot:{}".format(line))
         sys.exit()
     return (ballot,count)
 
@@ -310,7 +311,7 @@ def import_ballot(P,ballot,count):
     count = integer multiplicity for ballot
     """
     if not ballot_OK(ballot):
-        print "Illegal ballot:", ballot
+        print("Illegal ballot:{}".format(line))
         sys.exit()
     if P.has_key(ballot):
         P[ballot] += count
@@ -380,13 +381,13 @@ def import_file(filename,P=None,params=None):
         P = { }
     if params == None:
         params = default_params()
-    print "Reading ballots from file:",filename
+    print("Reading ballots from file:{}".format(filename))
     file = open(filename,"r")
     text = file.read()
     lines = text.split("\n")
     for line in lines:
         if len(line)>0 and line[0]=="#":               # at least a comment
-            print line                                 # print it out
+            print(line)                                # print it out
             handle_possible_parameter(line,params)     # perhaps setting a parameter
     import_lines(P,lines)
     return P,params
@@ -436,12 +437,12 @@ def handle_possible_parameter(line,params,printing_wanted=True):
         parametervalue = coerce(parametervalue)
         # check that parameter name is a parameter than can be assigned (i.e. already in params)
         if not params.has_key(parametername):
-            print "Error: `%s' is not a parameter than can be set."%parametername
+            print("Error: `{}' is not a parameter than can be set.".format(parametername))
             sys.exit()
         if params[parametername]!=None and type(params[parametername])!=type(parametervalue):
-            print "Warning: value '%s' does not seem to have proper type for parameter `%s'."%(parametervalue,parametername)
+            print("Warning: value '{}' does not seem to have proper type for parameter `{}'.".format(parametervalue,parametername))
         params[parametername] = parametervalue
-        print indent+"Parameter `%s' set to `%s'."%(parametername, parametervalue)
+        print(indent+"Parameter `{}' set to `{}'.".format(parametername, parametervalue))
 
 def print_profile(P,election_ID,print_by_decreasing_count=True):
     """
@@ -450,22 +451,22 @@ def print_profile(P,election_ID,print_by_decreasing_count=True):
     otherwise print in alphabetic order
     """
     if print_by_decreasing_count:
-        print "%s: Profile of ballots (with multiplicities), in decreasing order by count:"%election_ID
+        print("{}: Profile of ballots (with multiplicities), in decreasing order by count:".format(election_ID))
         ballots = [(P[ballot],ballot) for ballot in P.keys()]
         ballots = sorted(ballots)
         ballots.reverse()
         ballots = [ b for (cnt,b) in ballots ]
     else:
-        print "%s: Profile of ballots (with multiplicities), in sorted (alphabetic) order:"%election_ID
+        print("{}: Profile of ballots (with multiplicities), in sorted (alphabetic) order:".format(election_ID))
         ballots = [(ballot,P[ballot]) for ballot in P.keys()]
         ballots = sorted(ballots)
         ballots = [ b for (b,cnt) in ballots ]
     for ballot in ballots:
-        line = string.join([ str(alternative) for alternative in ballot ])
+        line = ", ".join([ str(alternative) for alternative in ballot ])
         count = P[ballot]
-        line += "  (%d)  "%count
-        print indent+line
-    print indent+"Total count =",number_of_ballots_in_profile(P)
+        line += "  ({})  ".format(count)
+        print(indent+line)
+    print(indent+"Total count =",number_of_ballots_in_profile(P))
 
 def filter_profile(P,A):
     """
@@ -530,7 +531,7 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
 
     dist_ID = dist_type[0]
     if dist_ID not in ["uniform","geometric","hypersphere"]:
-        print "Illegal distribution descriptor for random profile generator:",dist_ID
+        print("Illegal distribution descriptor for random profile generator:",dist_ID)
         sys.exit()
 
     if dist_ID == "uniform":
@@ -547,15 +548,15 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
         for a in A:
             c[a] = [ random.random() for j in range(d)]
         if printing_wanted:
-            print "Candidates:",
-            for a in sorted(A): print "%s:"%a,c[a],
-            print
+            print("Candidates:")
+            for a in sorted(A): print("%s:".format(a),c[a])
+            print()
         for i in range(ballot_count):
             # generate voter vector v and issue importance vector s
             v = [ random.random() for j in range(d)]
             s = [ random.random() for j in range(d)]
             if printing_wanted:
-                print "Voter %d:"%i,v,s,
+                print("Voter {}:".format(i),v,s)
             # generate ballot for that voter:
             p = 2                              # for L_p norm
             L = [ ( sum( [ s[j]*(abs(v[j]-c[a][j]))**p for j in range(d) ]), a) for a in A ]
@@ -563,7 +564,7 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             ballot = tuple([ a for (x,a) in L ])
             full_ballots.append(ballot)
             if printing_wanted:
-                print L, ballot
+                print(L, ballot)
     elif dist_ID == "hypersphere":
         # ("hypersphere",d)
         d = dist_type[1]
@@ -572,12 +573,12 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
         for a in A:
             c[a] = random_hypersphere_point(d)
         if printing_wanted:
-            print "Candidates:"
-            for a in sorted(A): print "%s:"%a,c[a]
+            print("Candidates:")
+            for a in sorted(A): print("{}:".format(a),c[a])
         for i in range(ballot_count):
             v = random_hypersphere_point(d)
             if printing_wanted:
-                print "Voter %d:"%i,v
+                print ("Voter {}:".format(i),v)
             # generate ballot for that voter:
             # note that the distance used in L_p in d-space, and not around
             # the surface of the sphere, but the candidate orderings are unchanged by this.
@@ -587,7 +588,7 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             ballot = tuple([ a for (x,a) in L ])
             full_ballots.append(ballot)
             if printing_wanted:
-                print L, ballot
+                print(L, ballot)
     # truncate ballots if desired
     P = { }
     if length_range == None:
@@ -667,24 +668,25 @@ def print_matrix(A,mat):
     mat = dict mapping pairs of labels (candidates) to integers.
     """
     width = max( [ len(str(a)) for a in A ] + [ len(str(v)) for v in mat.values() ] )
-    print indent + " "*(width+1),
+    print(indent + " "*(width+1),)
     for a in A:
-        print string.rjust(a,width+1),
-    print
+        i=0
+        #print(" ".rjust(len(a)," "),)
+    #print()
     for a in A:
-        print indent+string.ljust(a,width+1),
+        #print(indent+string.ljust(a,width+1),)
         for b in A:
             cnt = 0
-            if mat.has_key((a,b)): cnt = mat[(a,b)]
-            print string.rjust(str(cnt),width+1),
-        print
+            if (a,b) in mat: cnt = mat[(a,b)]
+            #print(string.rjust(str(cnt),width+1),)
+        #print
 
 def print_pairwise_prefs(A,pref,election_ID):
-    print "%s: Pairwise preferences (number of voters preferring row over column):"%election_ID
+    print("{}: Pairwise preferences (number of voters preferring row over column):".format(election_ID))
     print_matrix(A,pref)
 
 def print_pairwise_margins(A,margin,election_ID):
-    print "%s: Pairwise margins (net number of voters preferring row over column):"%election_ID
+    print("{}: Pairwise margins (net number of voters preferring row over column):".format(election_ID))
     print_matrix(A,margin)
 
 def save_matrix(filanme,A,mat):
@@ -738,11 +740,11 @@ def setup_TB(A,params,printing_wanted=True):
     for a,v in zip(sorted(A),value_list):
         TB[a] = v
     if printing_wanted:
-        print "Tie-breaker values (smaller is better):"
-        print indent,
+        print("Tie-breaker values (smaller is better):")
+        print(indent,)
         for a in A:
-            print str(a)+":"+str(TB[a])+" ",
-        print
+            print(str(a)+":"+str(TB[a])+" ",)
+        print()
 
 ########################################################################################
 ### Unanimous
@@ -754,15 +756,15 @@ def unanimous_winner(A,P,params,election_ID,printing_wanted=False):
     Unanimous winner has all voters giving winner first place.
     """
     if printing_wanted:
-        print "%s: Computing Unanimous winner (if any)."%election_ID
+        print("{}: Computing Unanimous winner (if any).".format(election_ID))
     n = number_of_ballots_in_profile(P)
     L = first_choice_counts(A,P)
     max_count = L[0][0]
     if max_count==n:
         if printing_wanted:
-            print indent+"Unanimous winner is",L[0][1]
+            print(indent+"Unanimous winner is",L[0][1])
         return L[0][1]
-    print indent+"No Unanimous winner exists."
+    print(indent+"No Unanimous winner exists.")
     return None
 
 ########################################################################################
@@ -775,15 +777,15 @@ def majority_winner(A,P,params,election_ID,printing_wanted=False):
     Majority winner has majority of voters giving candidate first place.
     """
     if printing_wanted:
-        print "%s: Computing Majority winner (if any)."%election_ID
+        print("{}: Computing Majority winner (if any).".format(election_ID))
     n = number_of_ballots_in_profile(P)
     L = first_choice_counts(A,P)
     max_count = L[0][0]
     if max_count>n/2:
         if printing_wanted:
-            print indent+"Majority winner is",L[0][1]
+            print(indent+"Majority winner is",L[0][1])
         return L[0][1]
-    print indent+"No Majority winner exists."
+    print(indent+"No Majority winner exists.")
     return None
 
 ########################################################################################
@@ -795,15 +797,15 @@ def plurality_winners(A,P,params,election_ID,printing_wanted=False):
     Return list of all plurality winners (may be more than one if ties occur).
     """
     if printing_wanted:
-        print "%s: Computing Plurality winner(s)."%election_ID
+        print("{}: Computing Plurality winner(s).".format(election_ID))
     L = first_choice_counts(A,P)
     max_count = L[0][0]
     winners = sorted([ a for (cnt,a) in L if cnt==max_count ])
     if printing_wanted:
         if len(winners) == 1:
-            print indent+"Plurality winner is",winners[0]
+            print(indent+"Plurality winner is",winners[0])
         else:
-            print indent+"Plurality winners are: ",string.join(map(str,winners))
+            print(indent+"Plurality winners are: ",string.join(map(str,winners)))
     return winners
 
 def plurality_winner(A,P,params,election_ID,printing_wanted=False):
@@ -814,9 +816,9 @@ def plurality_winner(A,P,params,election_ID,printing_wanted=False):
     winners = plurality_winners(A,P,params,election_ID,printing_wanted=False)
     winner = min( [ (TB[w],w) for w in winners ] )[1]
     if printing_wanted:
-        print indent+"plurality potential winners:",
-        for w in sorted(winners): print w,
-        print ", winner is:",winner
+        print(indent+"plurality potential winners:",)
+        for w in sorted(winners): print(w,)
+        print(", winner is:",winner)
     return winner
 
 ########################################################################################
@@ -829,7 +831,7 @@ def Condorcet_winner(A,P,params,election_ID,printing_wanted=False):
     Condorcet winner strictly beats every other in head-on-head competition.
     """
     if printing_wanted:
-        print "%s: Computing Condorcet winner (if any)."%election_ID
+        print("{}: Computing Condorcet winner (if any).".format(election_ID))
     winner = None
     pref = pairwise_prefs(A,P,params)        # pref[(i,j)] gives number preferring i to j
     for a in A:
@@ -838,9 +840,9 @@ def Condorcet_winner(A,P,params,election_ID,printing_wanted=False):
             break
     if printing_wanted:
         if winner == None:
-            print indent+"No Condorcet winner exists."
+            print(indent+"No Condorcet winner exists.")
         else:
-            print indent+"Condorcet winner is",winner
+            print(indent+"Condorcet winner is",winner)
     return winner
 
 
@@ -858,7 +860,7 @@ def Borda_winner(A,P,params,election_ID,printing_wanted=False):
     """
     global TB
     if printing_wanted:
-        print "%s: Computing Borda winner."%election_ID
+        print("{}: Computing Borda winner.".format(election_ID))
     prefs = pairwise_prefs(A,P,params)      # prefs[(i,j)] gives number preferring i to j
     scorelist = [ ]
     for a in A:
@@ -871,8 +873,8 @@ def Borda_winner(A,P,params,election_ID,printing_wanted=False):
         line = indent
         for score,tba,a in scorelist:
             line += "%s:%d "%(a,score)
-        print line
-        print indent+"Borda winner is",winner
+        print(line)
+        print(indent+"Borda winner is",winner)
     return winner
 
 ########################################################################################
@@ -887,7 +889,7 @@ def minimax_winner(A,P,params,election_ID,printing_wanted=False):
     """
     global TB                    # tie-breaker values (smaller is better)
     if printing_wanted:
-        print "%s: Computing minimax winner."%election_ID
+        print("{}: Computing minimax winner.".format(election_ID))
     winner = None
     margin = pairwise_margins(A,P,params)
     for a in A:
@@ -897,7 +899,7 @@ def minimax_winner(A,P,params,election_ID,printing_wanted=False):
             min_score = a_score
             winner = a
     if printing_wanted:
-        print indent+"minimax winner is",winner
+        print(indent+"minimax winner is",winner)
     return winner
 
 ########################################################################################
@@ -920,7 +922,7 @@ def Smith_set(A,P,params,election_ID,printing_wanted=False):
          P = profile (dict mapping ballots to counts).
     """
     if printing_wanted:
-        print "%s: Computing Smith set."%election_ID
+        print("{}: Computing Smith set.".format(election_ID))
     pref = pairwise_prefs(A,P,params)        # pref[(i,j)] gives number preferring i to j
     n = number_of_ballots_in_profile(P)
     stack = []
@@ -933,7 +935,7 @@ def Smith_set(A,P,params,election_ID,printing_wanted=False):
             (index,scc)=Smith_aux(a,A,index,I,L,stack,in_stack,pref,n)
     scc = sorted(scc)
     if printing_wanted:
-        print indent+"Smith set is: "+string.join(scc)
+        print(indent+"Smith set is: "+string.join(scc))
     return scc
 
 def Smith_aux(a,A,index,I,L,stack,in_stack,pref,n):
@@ -981,6 +983,7 @@ def IRV_count(A,P,elim):
     """
     count = { }
     for c in A:
+        print("inside IRV count")
         count[c] = sum([P[b] for b in ballots_for(P.keys(),c,elim)])
     return count
 
@@ -993,26 +996,29 @@ def IRV_winner(A,P,params,election_ID,printing_wanted=False):
     """
     global TB                       # tie-breaker values (smaller is better)
     if printing_wanted:
-        print "%s: Computing IRV winner."%election_ID
+        print("{}: Computing IRV winner.".format(election_ID))
     remaining = A[:]                # candidates not yet eliminated
     elim = []                       # candidates eliminated
     while len(remaining)>1:
+        print("hello")
         count = IRV_count(A,P,elim)
+        print("hello again")
         L = sorted( [ (count[c],-TB[c],c) for c in remaining ] )
         loser = L[0][2]          # a candidate with smallest count (and larger TB value if tied)
         # note ties broken in favor of eliminating candidate whose name sorts earlier
         remaining.remove(loser)
         elim.append(loser)
         if printing_wanted:
-            print indent+"Round %d votes counts:"%(len(A)-len(remaining)),
+            print(indent+"Round {} votes counts:".format(len(A)-len(remaining)),)
             L = sorted([ (count[alt],alt) for alt in count.keys() ])
             L.reverse()
             for (cnt,alt) in L:
                 if cnt>0:
-                    print "%s=%d"%(alt,cnt),
-            print "so",loser,"is eliminated."
+                    i=0
+                    #print("{}={}".format(alt,cnt),)#
+            print("so",loser,"is eliminated.")
     winner = remaining[0]
-    if printing_wanted: print indent+"IRV winner is",winner
+    if printing_wanted: print(indent+"IRV winner is",winner)
     return winner
 
 ########################################################################################
@@ -1095,13 +1101,13 @@ def Schulze_winner(A,P,params,election_ID,printing_wanted=False):
     # for tie-breaking.
     global TB
     if printing_wanted:
-        print "%s: Computing Schulze winner(s). (Variant based on `winning votes' ordering.)"%election_ID
+        print("{}: Computing Schulze winner(s). (Variant based on `winning votes' ordering.)".format(election_ID))
     winners = Schulze_potential_winners(A,P,params,election_ID,printing_wanted)
     winner = min( [ (TB[w],w) for w in winners ] )[1]      # tie-breaker
     if printing_wanted:
-        print indent+"Schulze potential winners:",
-        for w in sorted(winners): print w,
-        print ", winner is:",winner
+        print(indent+"Schulze potential winners:",)
+        for w in sorted(winners): print(w,)
+        print(", winner is:",winner)
     return winner
 
 ########################################################################################
@@ -1109,17 +1115,17 @@ def Schulze_winner(A,P,params,election_ID,printing_wanted=False):
 ########################################################################################
 def print_optimal_mixed_strategy(A,x,printing_wanted=False):
     if printing_wanted:
-        print indent+"  Optimal mixed strategy =   ",
+        print(indent+"  Optimal mixed strategy =   ",)
         for (i,xi) in zip(range(len(A)),x):
-            print "%s:%11.6f "%(A[i],xi),
-        print
-        print indent+"  Sum of squares = ",sum([xi*xi for xi in x])
-        print indent+"  Cumulative probabilities = ",
+            print("{}:{} ".format(A[i],xi),)
+        print()
+        print(indent+"  Sum of squares = ",sum([xi*xi for xi in x]))
+        print(indent+"  Cumulative probabilities = ",)
         cp = 0.0
         for (ai,xi) in zip(A,x):
             cp += xi
-            print "%s:%11.6f "%(ai,cp),
-        print
+            print("{}:{} ".format(ai,cp),)
+        print()
 
 def gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted=False):
     """
@@ -1135,7 +1141,7 @@ def gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted=False):
         for j in range(m):
             M[i][j] = margin[A[i],A[j]]
 
-    print indent+"Using game_cvxopt.qp_solver (quadratic programming --> balanced soln)"
+    print(indent+"Using game_cvxopt.qp_solver (quadratic programming --> balanced soln)")
     qp_x = game_cvxopt.qp_solver(M)
     print_optimal_mixed_strategy(A,qp_x,printing_wanted)
 
@@ -1154,7 +1160,7 @@ def gt_optimal_mixed_strategy_lp(A,P,params,election_ID,printing_wanted=False):
         for j in range(m):
             M[i][j] = margin[A[i],A[j]]
 
-    print indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)"
+    print(indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)")
     lp_x = game_cvxopt.lp_solver(M)
     print_optimal_mixed_strategy(A,lp_x,printing_wanted)
 
@@ -1179,8 +1185,8 @@ def non_uniform_picker(x,L,params):
             ans = cand
             break
     if ans == None:
-        print "Picker can't pick a value; error!"
-        print x, L, test_value, cum_prob
+        print("Picker can't pick a value; error!")
+        print(x, L, test_value, cum_prob)
         ans = L[0]
     return ans
 
@@ -1204,11 +1210,11 @@ def gt_winner(A,P,params,election_ID,printing_wanted=False):
     Return winner according to GT voting system.
     """
     if printing_wanted:
-        print "%s: Computing GT winner."%election_ID
+        print("{}: Computing GT winner.".format(election_ID))
     x = gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted)
     gt_winner = non_uniform_picker(x,A,params)
     if printing_wanted:
-        print indent+"GT winner is",gt_winner, " (randomly chosen according to balanced optimal mixed strategy)."
+        print(indent+"GT winner is",gt_winner, " (randomly chosen according to balanced optimal mixed strategy).")
     return gt_winner
 
 def gtd_winner(A,P,params,election_ID,printing_wanted=False):
@@ -1219,11 +1225,11 @@ def gtd_winner(A,P,params,election_ID,printing_wanted=False):
     """
     global TB                           # tie-breaker values -- smaller is better
     if printing_wanted:
-        print "%s: Computing GTD winner."%election_ID
+        print("{}: Computing GTD winner.".format(election_ID))
     x = gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted)
     gtd_winner = max( [ (x[i],-TB[a],a) for i,a in enumerate(A)] )[2]
     if printing_wanted:
-        print indent+"GTD winner is",gtd_winner, " (a candidate with max probability in optimal mixed strategy)."
+        print(indent+"GTD winner is",gtd_winner, " (a candidate with max probability in optimal mixed strategy).")
     return gtd_winner
 
 def gts_winners(A,P,params,election_ID,printing_wanted=False):
@@ -1231,11 +1237,11 @@ def gts_winners(A,P,params,election_ID,printing_wanted=False):
     Return set of support for GT voting system.
     """
     if printing_wanted:
-        print "%s: Computing GTS winners."%election_ID
+        print("%s: Computing GTS winners.".format(election_ID))
     x = gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted)
     gts_winners = gt_support(A,x)
     if printing_wanted:
-        print indent+"GTS winners are",gts_winners, " (candidates with positive probability in optimal mixed strategy)."
+        print(indent+"GTS winners are",gts_winners, " (candidates with positive probability in optimal mixed strategy).")
     return gts_winners
 
 
@@ -1282,8 +1288,8 @@ def test_one(filename):
     """
     Run all routines on the given file.
     """
-    print "-"*80
-    print "-"*80
+    print("-"*80)
+    print("-"*80)
 
     P,params = import_file(filename)
     test_P(P,params,filename)
@@ -1317,7 +1323,7 @@ def test_P(P,params,election_ID):
     # code stub that might be expanded or used someday...
     filter_by_Smith_set_wanted = False
     if filter_by_Smith_set_wanted:
-        print "Now filtering by Smith set."
+        print("Now filtering by Smith set.")
         PSmith = filter_profile(P,Smith)
         prefSmith = pairwise_prefs(Smith,PSmith,params)
         print_profile(PSmith,election_ID)
@@ -1341,14 +1347,14 @@ def runoff(fname,f,gname,g,printing_wanted=True):
     params = None                    # no special ballot treatment
     condorcet_OK = True              # if True, proceed even if there is a Condorcet winner
 
-    A = list(string.uppercase[:m])   # candidates are A B C ...
+    A = list(string.upper[:m])   # candidates are A B C ...
     setup_TB(A,params)               # setup tie-breaker values
     if printing_wanted:
-        print "Number of candidates =",m
-        print "Number of ballots per election trial =",ballot_count
-        print "ballot_distribution:",ballot_distribution
-        print "ballot min/max lengths:",ballot_lengths
-        print "Allow profiles with Condorcet winners:",condorcet_OK
+        print("Number of candidates =",m)
+        print("Number of ballots per election trial =",ballot_count)
+        print("ballot_distribution:",ballot_distribution)
+        print("ballot min/max lengths:",ballot_lengths)
+        print("Allow profiles with Condorcet winners:",condorcet_OK)
     N_xy = 0
     N_yx = 0
     for trial in range(trials):
@@ -1371,12 +1377,12 @@ def runoff(fname,f,gname,g,printing_wanted=True):
         y = f(A,P,params,election_ID,printing_wanted=True)         # other method
         N_xy += prefs[(x,y)]
         N_yx += prefs[(y,x)]
-        print "Trial %4d: Total number preferring %s over %s = %6d," \
-              " Total number preferring %s over %s = %6d"%(trial,gname,fname,N_xy,fname,gname,N_yx)
+        print("Trial {}: Total number preferring {} over {} = {}," \
+              " Total number preferring {} over {} = {}".format(trial,gname,fname,N_xy,fname,gname,N_yx))
     if N_xy > 0:
-        print "%s / %s = %7.4f"%(fname,gname,float(N_yx)/float(N_xy))
-    print "number of trials = ",trials
-    print "number having Condorcet winner = ",number_condorcet
+        print("{} / {} = {%7.4f}".format(fname,gname,float(N_yx)/float(N_xy)))
+    print("number of trials = ",trials)
+    print("number having Condorcet winner = ",number_condorcet)
 
 def L1_dist(A, B):
     return sum([abs(ai-bi) for ai,bi in zip(A,B)])
@@ -1406,7 +1412,7 @@ def compare_methods(qs, printing_wanted=True):
     """
     election_ID = "compare"
     m = 5                            # number of candidates
-    trials = 10000                   # number of simulated elections
+    trials = 10000                  # number of simulated elections
     ballot_count = 100               # ballots per simulated election
     ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
@@ -1415,16 +1421,16 @@ def compare_methods(qs, printing_wanted=True):
     params = None                    # no special ballot treatments
     condorcet_OK = True              # proceed even if there is a Condorcet winner
 
-    A = list(string.uppercase[:m])   # candidates are 'A' 'B' 'C' ...
+    A = list(string.ascii_uppercase[:m])   # candidates are 'A' 'B' 'C' ...
     setup_TB(A,params)               # establish tie-breaker values
     num_methods = len(qs)
 
     if printing_wanted:
-        print "Number of candidates =",m
-        print "Number of ballots per election trial =",ballot_count
-        print "ballot_distribution:",ballot_distribution
-        print "ballot min/max lengths:",ballot_lengths
-        print "Allow profiles with Condorcet winners:",condorcet_OK
+        print("Number of candidates =",m)
+        print("Number of ballots per election trial =",ballot_count)
+        print("ballot_distribution:",ballot_distribution)
+        print("ballot min/max lengths:",ballot_lengths)
+        print("Allow profiles with Condorcet winners:",condorcet_OK)
 
     trial_counter = 0
     number_condorcet = 0
@@ -1438,7 +1444,7 @@ def compare_methods(qs, printing_wanted=True):
             Nprefs[qiname,qjname] = 0
             Nmargins[qiname,qjname] = 0
     for trial in range(trials):
-        print "Trial %4d:"%trial
+        print("Trial {}:".format(trial))
         # generate random profile
         while True:
             trial_counter += 1
@@ -1464,10 +1470,10 @@ def compare_methods(qs, printing_wanted=True):
         if L1_dist(lp_p,p) < 0.02:
             num_optimal_mixed_strategy_unique += 1
             if printing_wanted:
-                print indent+"LP and QP give same solution to GT"
+                print(indent+"LP and QP give same solution to GT")
         else:
             if printing_wanted:
-                print indent+"LP and QP give different solutions to GT"
+                print(indent+"LP and QP give different solutions to GT")
         # iterate through all methods
         w = [ None ] * len(qs)     # for each method, a winner, or a list of winners
         for (i,(qname, q)) in enumerate(qs):
@@ -1483,23 +1489,26 @@ def compare_methods(qs, printing_wanted=True):
                     Nprefs[qiname,qjname]+=prefs[w[i],w[j]]
                     Nmargins[qiname,qjname]+=margins[w[i],w[j]]
 
-    print "--------------------------------------------------------------------------------------"
-    print "\nnumber of trials = ",trials
-    print "number of profiles generated = ", trial_counter
-    print "number having Condorcet winner = ", number_condorcet
-    print "number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique
+    print("--------------------------------------------------------------------------------------")
+    print("\nnumber of trials = ",trials)
+    print("number of profiles generated = ", trial_counter)
+    print("number having Condorcet winner = ", number_condorcet)
+    print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
     method_names = [ qname for (qname,q) in qs ]
-    print "Nagree:"
+    print("Nagree:")
+    print(Nagree)
     print_matrix(method_names,Nagree)
-    print "Nprefs:"
+    print("Nprefs:")
+    print(Nprefs)
     print_matrix(method_names,Nprefs)
-    print "Nmargins:"
+    print("Nmargins:")
+    print(Nmargins)
     print_matrix(method_names,Nmargins)
 
 
 if __name__ == "__main__":
     if len(sys.argv)==1:
-        print usage
+        print(usage)
         sys.exit()
     for filename in sys.argv[1:]:
         if filename == "-runoff":
@@ -1522,8 +1531,8 @@ if __name__ == "__main__":
                               ])
             sys.exit()
         # If we get here, filename is indeed a file name
-        print "-"*80
-        print "-"*80
+        print("-"*80)
+        print("-"*80)
         P,params = import_file(filename)
         election_ID = os.path.basename(os.path.splitext(filename)[0])
         test_P(P,params,election_ID)
@@ -1535,4 +1544,4 @@ if __name__ == "__main__":
         else:
             filename = filename + ".margins"
         save_matrix(filename,A,margin)
-    print "Done."
+    print("Done.")

@@ -162,7 +162,7 @@ def qp_solver_test():
           [   0,   0,   0,    0 ],
           [ -20,   0,   0,   30 ],
           [  50,   0, -30,    0  ]]
-    print qp_solver(M)
+    print(qp_solver(M))
 
 if __name__== "__main__":
     qp_solver_test()
