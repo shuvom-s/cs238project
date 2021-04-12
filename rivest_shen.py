@@ -589,6 +589,8 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             full_ballots.append(ballot)
             if printing_wanted:
                 print(L, ballot)
+    elif dist_ID == "polya_urn":
+        pass
     # truncate ballots if desired
     P = { }
     if length_range == None:
@@ -1340,7 +1342,7 @@ def runoff(fname,f,gname,g,printing_wanted=True):
     election_ID = "runoff"
     number_condorcet = 0
     m = 5                            # number of candidates
-    trials = 2000                    # number of simulated elections
+    trials = 10000                    # number of simulated elections
     ballot_count = 100               # number of ballots per simulated election
     ballot_distribution = ("hypersphere",3)     # points on a sphere
     ballot_lengths = None            # full ballots wanted
@@ -1424,7 +1426,7 @@ def compare_methods(qs, printing_wanted=True):
     """
     election_ID = "compare"
     m = 5                            # number of candidates
-    trials = 1000                  # number of simulated elections
+    trials = 10000                  # number of simulated elections
     ballot_count = 100               # ballots per simulated election
     ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
