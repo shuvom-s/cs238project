@@ -1392,7 +1392,7 @@ def runoff(fname,f,gname,g,printing_wanted=True):
         print("Trial {}: Total number preferring {} over {} = {}," \
               " Total number preferring {} over {} = {}".format(trial,gname,fname,N_xy,fname,gname,N_yx))
     if N_xy > 0:
-        print("{} / {} = {%7.4f}".format(fname,gname,float(N_yx)/float(N_xy)))
+        print("{} / {} = {:7.4f}".format(fname,gname,float(N_yx)/float(N_xy)))
     print("number of trials = ",trials)
     print("number having Condorcet winner = ",number_condorcet)
 
