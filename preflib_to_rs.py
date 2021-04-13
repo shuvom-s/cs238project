@@ -13,9 +13,10 @@ import operator
 import itertools
 import math
 import copy
+import glob
 
 
-def convert_toc(filename, ext):
+def convert(filename, ext):
 	"""
 	Converts the preflib toc file to a file in the format that Rivest and Shen's
 	GT code will accept. 
@@ -34,10 +35,11 @@ def convert_toc(filename, ext):
 
 	# Skip over list of canidates, other metadata
 	num_alts = lines[0]
-	lines = lines[int(num_alts)+2:]
+	lines = lines[int(num_alts)+2:len(lines)-1]
 
 
 	for line in lines:
+		#print(line)
 		seen = []
 		newline = ""
 		# first element is count then stricly ranked candidates, every element after is a candidate 
@@ -47,8 +49,8 @@ def convert_toc(filename, ext):
 			if newline == "":
 				cands = rank.split(",")
 				newline += "(" + str(cands[0]) + ") "
-				for cand in cands[1:len(cands) - 1]:
-					if cand not in seen:
+				for cand in cands[1:len(cands)]:
+					if cand not in seen and cand != "":
 						seen.append(cand)
 						newline += cand + " "
 			elif '}' in rank:
@@ -73,15 +75,13 @@ def convert_toc(filename, ext):
 
 
 
-def convert_files(filename):
+def convert_files(path, ext):
 	"""
-	Converts all the preflib toc files listed in the text file 'filename' to 
-	files in the format that Rivest and Shen's GT code will accept. 
+	Converts all the preflib files along the path to the format that 
+	Rivest and Shen's GT code will accept. 
     """
-	input = open(filename, "r")
-	text = input.read()
-	files = text.split("\n")
-	for fn in files:
-		convert_toc(fn, "toc")
 
-convert_files("files-to-convert.txt")
+	for fn in glob.glob(path):
+		convert(fn[:-4], ext)
+
+convert_files("**/*.soc", "soc")

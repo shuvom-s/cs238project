@@ -215,12 +215,9 @@ def ballots_for(B,c,elim):
     """
     ans = []
     for ballot in B:
-        #print(elim)
-        #print(ballot)
-        filtered_ballot = filter( lambda x: x != "=" and x not in elim, ballot)
-        filtered_ballot = list(filtered_ballot)
-        #print(len(list(filtered_ballot)))
-        if len(list(filtered_ballot))>0 and list(filtered_ballot)[0] == c:
+        filtered_ballot = filter(lambda x: x != "=" and x not in elim, ballot)
+        lst = list(filtered_ballot)
+        if len(lst) > 0 and lst[0] == c:
             ans.append(ballot)
     return ans
 
@@ -989,10 +986,13 @@ def IRV_count(A,P,elim):
     """
     count = { }
     for c in A:
+<<<<<<< HEAD
         #print("inside IRV count")
         #print("eliminating: ", elim)
         #print("ballots: ", P.keys())
         #print(c)
+=======
+>>>>>>> 2a50dc9b4a01938e554fd7cf5f2d3cde4a6b5125
         count[c] = sum([P[b] for b in ballots_for(P.keys(),c,elim)])
     return count
 
@@ -1009,9 +1009,13 @@ def IRV_winner(A,P,params,election_ID,printing_wanted=False):
     remaining = A[:]                # candidates not yet eliminated
     elim = []                       # candidates eliminated
     while len(remaining)>1:
+<<<<<<< HEAD
         #print("hello")
         count = IRV_count(A,P,elim)
         #print("hello again")
+=======
+        count = IRV_count(A,P,elim)
+>>>>>>> 2a50dc9b4a01938e554fd7cf5f2d3cde4a6b5125
         L = sorted( [ (count[c],-TB[c],c) for c in remaining ] )
         loser = L[0][2]          # a candidate with smallest count (and larger TB value if tied)
         # note ties broken in favor of eliminating candidate whose name sorts earlier
@@ -1349,7 +1353,8 @@ def runoff(fname,f,gname,g,printing_wanted=True):
     election_ID = "runoff"
     number_condorcet = 0
     m = 5                            # number of candidates
-    trials = 1                    # number of simulated elections
+
+    trials = 10000                   # number of simulated elections
     ballot_count = 100               # number of ballots per simulated election
     ballot_distribution = ("hypersphere",3)     # points on a sphere
     ballot_lengths = None            # full ballots wanted
