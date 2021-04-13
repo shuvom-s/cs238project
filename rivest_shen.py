@@ -44,6 +44,8 @@ import os
 import random
 import string
 import sys
+import itertools
+import random
 
 import game_cvxopt                  # LP and QP solvers for two-person zero-sum games
 
@@ -73,7 +75,7 @@ def print_alternatives(A,election_ID):
     Print out list of candidates, nicely, in sorted order.
     """
     print("{}: Alternatives:".format(election_ID))
-    print(indent+string.join([str(alt) for alt in sorted(A)]))
+    print(indent+", ".join([str(alt) for alt in sorted(A)]))
 
 ########################################################################################
 ### BALLOTS (TUPLES OF CANDIDATES)
@@ -312,7 +314,7 @@ def import_ballot(P,ballot,count):
     count = integer multiplicity for ballot
     """
     if not ballot_OK(ballot):
-        print("Illegal ballot:{}".format(line))
+        #print("Illegal ballot:{}".format(line))
         sys.exit()
     if P.has_key(ballot):
         P[ballot] += count
@@ -531,15 +533,18 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
     full_ballots = [ ]
 
     dist_ID = dist_type[0]
-    if dist_ID not in ["uniform","geometric","hypersphere"]:
+    if dist_ID not in ["uniform","geometric","hypersphere","polya_eggenberger"]:
         print("Illegal distribution descriptor for random profile generator:",dist_ID)
         sys.exit()
-
+    #print("the dist_ID is: ", dist_ID)
     if dist_ID == "uniform":
         # ("uniform")
+        print("uniform")
+        #print(A)
         for i in range(ballot_count):       # toss ballots in randomly
             ballot = A[:]
             random.shuffle(ballot)
+            #print(ballot)
             full_ballots.append(ballot)
     elif dist_ID == "geometric":
         # ("geometric", d)
@@ -550,7 +555,7 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             c[a] = [ random.random() for j in range(d)]
         if printing_wanted:
             print("Candidates:")
-            for a in sorted(A): print("%s:".format(a),c[a])
+            for a in sorted(A): print("{}:".format(a),c[a])
             print()
         for i in range(ballot_count):
             # generate voter vector v and issue importance vector s
@@ -590,8 +595,24 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             full_ballots.append(ballot)
             if printing_wanted:
                 print(L, ballot)
-    elif dist_ID == "polya_urn":
-        pass
+    elif dist_ID == "polya_eggenberger":
+        alpha = dist_type[1]
+        ballots = itertools.permutations(A)
+        all_ballots = [list(ballot) for ballot in ballots]
+        ballot_dict = {}
+        for i, ballot in enumerate(all_ballots):
+            ballot_dict[i] = ballot
+        
+        weights = [1 for i in range(len(all_ballots))]
+        ballot_ids = [i for i in range(len(all_ballots))]
+        for i in range(ballot_count):
+            #print(ballot_ids)
+            ballot_id = random.choices(ballot_ids, weights, k=1)[0]
+            print(ballot_id)
+            weights[ballot_id] += alpha
+            full_ballots.append(ballot_dict[ballot_id])
+        print(full_ballots)
+
     # truncate ballots if desired
     P = { }
     if length_range == None:
@@ -708,7 +729,7 @@ def save_matrix(filanme,A,mat):
         for b in A:
             cnt = 0
             if mat.has_key((a,b)): cnt = mat[(a,b)]
-            file.write(string.rjust(str(cnt),width+1)+" ")
+            file.write("".rjust(str(cnt),width+1)+" ")
         file.write("\n")
     file.close()
 
@@ -808,7 +829,7 @@ def plurality_winners(A,P,params,election_ID,printing_wanted=False):
         if len(winners) == 1:
             print(indent+"Plurality winner is",winners[0])
         else:
-            print(indent+"Plurality winners are: ",string.join(map(str,winners)))
+            print(indent+"Plurality winners are: ", ", ".join(map(str,winners)))
     return winners
 
 def plurality_winner(A,P,params,election_ID,printing_wanted=False):
@@ -934,11 +955,11 @@ def Smith_set(A,P,params,election_ID,printing_wanted=False):
     I = { }                              # gives indices of vertics
     L = { }                              # gives lowlinks of vertices
     for a in A:
-        if not I.has_key(a):             # Start a DFS at each node we haven't seen yet
+        if not a in I:             # Start a DFS at each node we haven't seen yet
             (index,scc)=Smith_aux(a,A,index,I,L,stack,in_stack,pref,n)
     scc = sorted(scc)
     if printing_wanted:
-        print(indent+"Smith set is: "+string.join(scc))
+        print(indent+"Smith set is: "+", ".join(scc))
     return scc
 
 def Smith_aux(a,A,index,I,L,stack,in_stack,pref,n):
@@ -1237,7 +1258,7 @@ def gts_winners(A,P,params,election_ID,printing_wanted=False):
     Return set of support for GT voting system.
     """
     if printing_wanted:
-        print("%s: Computing GTS winners.".format(election_ID))
+        print("{}: Computing GTS winners.".format(election_ID))
     x = gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted)
     gts_winners = gt_support(A,x)
     if printing_wanted:
@@ -1340,7 +1361,8 @@ def runoff(fname,f,gname,g,printing_wanted=True):
     election_ID = "runoff"
     number_condorcet = 0
     m = 5                            # number of candidates
-    trials = 10000                   # number of simulated elections
+
+    trials = 10                   # number of simulated elections
     ballot_count = 100               # number of ballots per simulated election
     ballot_distribution = ("hypersphere",3)     # points on a sphere
     ballot_lengths = None            # full ballots wanted
@@ -1543,7 +1565,7 @@ def evaluate_methods_real(qs, list_fns, printing_wanted=True):
         print(Nmargins)
         print_matrix(method_names,Nmargins)
 
-def compare_methods(qs, printing_wanted=True):
+def compare_methods(qs, ballot_distribution, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD).
     qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1552,10 +1574,10 @@ def compare_methods(qs, printing_wanted=True):
     (Currently we do not filter out those profiles having a Condorcet winner.)
     """
     election_ID = "compare"
-    m = 5                       # number of candidates
-    trials = 10               # number of simulated elections
+    m = 5                            # number of candidates
+    trials = 10000                 # number of simulated elections
     ballot_count = 100               # ballots per simulated election
-    ballot_distribution = ("hypersphere",3)   # points on a sphere
+    #ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
     #ballot_distribution = ("geometric", 3)
     ballot_lengths = None            # full ballots wanted
@@ -1618,7 +1640,7 @@ def compare_methods(qs, printing_wanted=True):
         # iterate through all methods
         w = [ None ] * len(qs)     # for each method, a winner, or a list of winners
         for (i,(qname, q)) in enumerate(qs):
-            w[i] = q(A,P,params,election_ID,printing_wanted=True)
+            w[i] = q(A,P,params,election_ID,printing_wanted=False)
         # score each method relative to the other
         for (i,(qiname, qi)) in enumerate(qs):
             for (j,(qjname, qj)) in enumerate(qs):
@@ -1645,6 +1667,7 @@ def compare_methods(qs, printing_wanted=True):
     print("Nmargins:")
     print(Nmargins)
     print_matrix(method_names,Nmargins)
+    return (number_condorcet, num_optimal_mixed_strategy_unique, Nagree, Nmargins)
 
 
 if __name__ == "__main__":
