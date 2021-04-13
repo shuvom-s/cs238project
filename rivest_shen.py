@@ -12,6 +12,7 @@
 **          Cambridge, MA 02139
 ** Email:   rivest@mit.edu, eshen@csail.mit.edu
 ** Date:    3/27/2010
+** Adapted in 2021 by Shuvom Sadhuka and Sahana Srinivasan
 **
 ** (The following license is known as "The MIT License")
 **
@@ -1413,6 +1414,135 @@ def agree(x,y):
         if yj in xset: return True
     return False
 
+def extract_profile(filename):
+    """
+    Extract profile from filename to use in comparing voting method, in lieu of ranodmly
+    generated distributions.
+    """
+
+    input = open(filename, "r")
+    text = input.read()
+    vote_vectors = text.split("\n")
+
+    P = { }
+
+    for vector in vote_vectors:
+        vector = vector.split(" ")
+        count = vector[0]
+        vote = vector[1:len(vector)-1]
+        if (len(count) > 0):
+            P[tuple(vote)] = int(count[1:len(count)-1])
+    return P
+
+def extract_alts(filename):
+    """
+    Extract the alternatives from the election whose data is stored in filename. These alternatives
+    will be used to evaluate and compare voting systems on the election. Return
+    the alternatives in lexographic order as a list, e.g. ['A', 'B', 'C'] or ['1', '2', '3', '4']
+    """
+
+    A = []
+
+    input = open(filename, "r")
+    text = input.read()
+    vote_vectors = text.split("\n")
+
+    # Assume completeness for every vote vector
+    vec = vote_vectors[0].split(" ")
+    vec = vec[1: len(vec)-1]
+    return sorted(vec)
+
+
+def evaluate_methods_real(qs, list_fns, printing_wanted=True):
+    """
+    Compare methods in qs to each other (and to GT and GTD), evaluated on
+    real-world data. qs contains a list of (qname, q) pairs, where qname is a string giving
+    the name of the method, and q takes args A, P, params and returns a winner. Profiles
+    are extracted from the data in list_fns, so the function can be run on one
+    or multiple elections at once.
+    """
+    number_condorcet = 0
+
+    for fn in list_fns:
+        election_ID = "compare"
+        params = None                    # no special ballot treatments
+        condorcet_OK = True              # proceed even if there is a Condorcet winner
+
+        A = extract_alts(fn)
+        #A = list(string.ascii_uppercase[:m])   # candidates are from the dataset
+        setup_TB(A,params)               # establish tie-breaker values
+        num_methods = len(qs)
+
+        if printing_wanted:
+            print("Number of candidates =",m)
+            print("Number of ballots per election trial =",ballot_count)
+            print("ballot_distribution:",ballot_distribution)
+            print("ballot min/max lengths:",ballot_lengths)
+            print("Allow profiles with Condorcet winners:",condorcet_OK)
+
+        num_optimal_mixed_strategy_unique = 0
+        Nagree = { }
+        Nprefs = { }
+        Nmargins = { }
+        for (qiname,qi) in qs:
+            for (qjname, qj) in qs:
+                Nagree[qiname,qjname] = 0
+                Nprefs[qiname,qjname] = 0
+                Nmargins[qiname,qjname] = 0
+
+        # extract profile from data
+        while True:
+            P = extract_profile(fn)
+            has_condorcet = (Condorcet_winner(A,P,params,election_ID,
+                                            printing_wanted=False) != None)
+            if condorcet_OK or not has_condorcet:
+                break
+        if printing_wanted:
+            print_profile(P,election_ID)
+        if has_condorcet:
+            number_condorcet += 1
+        prefs = pairwise_prefs(A,P,params)
+        margins = pairwise_margins(A,P,params)
+        # Generate optimal mixed strategy, GT winner, GTD winner
+        lp_p = gt_optimal_mixed_strategy_lp(A,P,params,election_ID,printing_wanted)
+        p = gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted)
+        if L1_dist(lp_p,p) < 0.02:
+            num_optimal_mixed_strategy_unique += 1
+            if printing_wanted:
+                print(indent+"LP and QP give same solution to GT")
+        else:
+            if printing_wanted:
+                print(indent+"LP and QP give different solutions to GT")
+        # iterate through all methods
+        w = [ None ] * len(qs)     # for each method, a winner, or a list of winners
+        for (i,(qname, q)) in enumerate(qs):
+            w[i] = q(A,P,params,election_ID,printing_wanted=True)
+        # score each method relative to the other
+        for (i,(qiname, qi)) in enumerate(qs):
+            for (j,(qjname, qj)) in enumerate(qs):
+                # agreement
+                if agree(w[i],w[j]):
+                    Nagree[qiname,qjname] += 1
+                # preferences and margins
+                if type(w[i])==type(str()) and type(w[j])==type(str()):
+                    Nprefs[qiname,qjname]+=prefs[w[i],w[j]]
+                    Nmargins[qiname,qjname]+=margins[w[i],w[j]]
+
+        print("--------------------------------------------------------------------------------------")
+        print(fn)
+        print("number having Condorcet winner = ", number_condorcet)
+        print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
+        method_names = [ qname for (qname,q) in qs ]
+        print("Nagree:")
+        print(Nagree)
+        print_matrix(method_names,Nagree)
+        print("Nprefs:")
+        print(Nprefs)
+        print_matrix(method_names,Nprefs)
+        print("Nmargins:")
+        print(Nmargins)
+        print_matrix(method_names,Nmargins)
+
 def compare_methods(qs, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD).
@@ -1422,8 +1552,8 @@ def compare_methods(qs, printing_wanted=True):
     (Currently we do not filter out those profiles having a Condorcet winner.)
     """
     election_ID = "compare"
-    m = 5                            # number of candidates
-    trials = 10000                  # number of simulated elections
+    m = 5                       # number of candidates
+    trials = 10               # number of simulated elections
     ballot_count = 100               # ballots per simulated election
     ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )

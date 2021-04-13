@@ -1,8 +1,9 @@
 import rivest_shen as rs
 
-methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
-    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
-    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+#methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
+#    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
+#    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+methods = [("plurality", rs.plurality_winner), ("gt", rs.gt_winner)]
 
 rs.compare_methods(methods, printing_wanted=False)
 
