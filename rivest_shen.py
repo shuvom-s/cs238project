@@ -43,6 +43,8 @@ import os
 import random
 import string
 import sys
+import itertools
+import random
 
 import game_cvxopt                  # LP and QP solvers for two-person zero-sum games
 
@@ -530,16 +532,18 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
     full_ballots = [ ]
 
     dist_ID = dist_type[0]
-    if dist_ID not in ["uniform","geometric","hypersphere"]:
+    if dist_ID not in ["uniform","geometric","hypersphere","polya_eggenberger"]:
         print("Illegal distribution descriptor for random profile generator:",dist_ID)
         sys.exit()
     #print("the dist_ID is: ", dist_ID)
     if dist_ID == "uniform":
         # ("uniform")
         print("uniform")
+        #print(A)
         for i in range(ballot_count):       # toss ballots in randomly
             ballot = A[:]
             random.shuffle(ballot)
+            #print(ballot)
             full_ballots.append(ballot)
     elif dist_ID == "geometric":
         # ("geometric", d)
@@ -590,8 +594,24 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             full_ballots.append(ballot)
             if printing_wanted:
                 print(L, ballot)
-    elif dist_ID == "polya_urn":
-        pass
+    elif dist_ID == "polya_eggenberger":
+        alpha = dist_type[1]
+        ballots = itertools.permutations(A)
+        all_ballots = [list(ballot) for ballot in ballots]
+        ballot_dict = {}
+        for i, ballot in enumerate(all_ballots):
+            ballot_dict[i] = ballot
+        
+        weights = [1 for i in range(len(all_ballots))]
+        ballot_ids = [i for i in range(len(all_ballots))]
+        for i in range(ballot_count):
+            #print(ballot_ids)
+            ballot_id = random.choices(ballot_ids, weights, k=1)[0]
+            print(ballot_id)
+            weights[ballot_id] += alpha
+            full_ballots.append(ballot_dict[ballot_id])
+        print(full_ballots)
+
     # truncate ballots if desired
     P = { }
     if length_range == None:
@@ -986,13 +1006,6 @@ def IRV_count(A,P,elim):
     """
     count = { }
     for c in A:
-<<<<<<< HEAD
-        #print("inside IRV count")
-        #print("eliminating: ", elim)
-        #print("ballots: ", P.keys())
-        #print(c)
-=======
->>>>>>> 2a50dc9b4a01938e554fd7cf5f2d3cde4a6b5125
         count[c] = sum([P[b] for b in ballots_for(P.keys(),c,elim)])
     return count
 
@@ -1009,13 +1022,7 @@ def IRV_winner(A,P,params,election_ID,printing_wanted=False):
     remaining = A[:]                # candidates not yet eliminated
     elim = []                       # candidates eliminated
     while len(remaining)>1:
-<<<<<<< HEAD
-        #print("hello")
         count = IRV_count(A,P,elim)
-        #print("hello again")
-=======
-        count = IRV_count(A,P,elim)
->>>>>>> 2a50dc9b4a01938e554fd7cf5f2d3cde4a6b5125
         L = sorted( [ (count[c],-TB[c],c) for c in remaining ] )
         loser = L[0][2]          # a candidate with smallest count (and larger TB value if tied)
         # note ties broken in favor of eliminating candidate whose name sorts earlier
@@ -1354,7 +1361,7 @@ def runoff(fname,f,gname,g,printing_wanted=True):
     number_condorcet = 0
     m = 5                            # number of candidates
 
-    trials = 10000                   # number of simulated elections
+    trials = 10                   # number of simulated elections
     ballot_count = 100               # number of ballots per simulated election
     ballot_distribution = ("hypersphere",3)     # points on a sphere
     ballot_lengths = None            # full ballots wanted

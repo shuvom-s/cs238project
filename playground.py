@@ -47,6 +47,8 @@ def unpack_and_save_results(results, methods, distribution):
     save_path = "results/distributions/" + str(distribution[0]) + "/"
     if distribution[0] == "geometric" or distribution[0] == "hypersphere":
         save_path += "d_" + str(distribution[1]) + "/"
+    if distribution[0] == "polya_eggenberger":
+        save_path += "alpha_" + str(distribution[1]) + "/"
     ## strictly 5 candidates for now
     save_path += "m_5/" 
     if not os.path.exists(save_path):
@@ -66,11 +68,14 @@ methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt"
     ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
     ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
-ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
-    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
-    ("uniform", )]
+#ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
+#    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
+#    ("uniform", )]
 
+ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
+    ("polya_eggenberger", 5), ("polya_eggenberger", 10),]
 for ballot_distribution in ballot_distributions:
+#results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
     results = rs.compare_methods(methods, ballot_distribution, printing_wanted=True)
     unpack_and_save_results(results, methods, ballot_distribution)
 
