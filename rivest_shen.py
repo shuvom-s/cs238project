@@ -1618,7 +1618,7 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
     Nmargins_total.to_csv(save_margins)
 
 
-def compare_methods(qs, ballot_distribution, printing_wanted=True):
+def compare_methods(qs, ballot_distribution, printing_wanted=True, m=5):
     """
     Compare methods in qs to each other (and to GT and GTD).
     qs contains a list of (qname, q) pairs, where qname is a string giving
