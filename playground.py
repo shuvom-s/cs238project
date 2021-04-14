@@ -19,7 +19,7 @@ def convert_to_dataframe(result_dict, method_names):
     return df
 
 
-def unpack_and_save_results(results, methods, distribution):
+def unpack_and_save_results(results, methods, distribution, m=5):
     """
     results: tuple of results; results[0]: num condorcet, results[1]: num unique strat,
     results[2]: agreement matrix, results[3]: margin matrix
@@ -49,8 +49,10 @@ def unpack_and_save_results(results, methods, distribution):
         save_path += "d_" + str(distribution[1]) + "/"
     if distribution[0] == "polya_eggenberger":
         save_path += "alpha_" + str(distribution[1]) + "/"
-    ## strictly 5 candidates for now
-    save_path += "m_5/" 
+    if distribution[0] == "UUP":
+        save_path += "enum_" + str(distribution[1]) + "/"
+        
+    save_path += "m_" + str(m) + "/" 
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     save_agree = save_path + "Nagree.csv"
@@ -62,6 +64,11 @@ def unpack_and_save_results(results, methods, distribution):
     df_margins.to_csv(save_margins)
     df_condorcet.to_csv(save_condorcet)
 
+    if distribution[0] == "UUP":
+        df_prob_vector = pd.DataFrame(distribution[2])
+        save_prob_vector = save_path + "prob_vector.csv"
+        df_prob_vector.to_csv(save_prob_vector)
+
 
 
 methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
@@ -72,11 +79,23 @@ methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt"
 #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
 #    ("uniform", )]
 
-ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
-    ("polya_eggenberger", 5), ("polya_eggenberger", 10),]
-for ballot_distribution in ballot_distributions:
+#ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
+#    ("polya_eggenberger", 5), ("polya_eggenberger", 10),]
+#for ballot_distribution in ballot_distributions:
 #results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
-    results = rs.compare_methods(methods, ballot_distribution, printing_wanted=True)
-    unpack_and_save_results(results, methods, ballot_distribution)
+enum = 0
+
+for p1 in np.arange(0.0, 1.0, 0.25):
+    for p2 in np.arange(0, 1-p1, 0.20):
+        for p3 in np.arange(0, 1-(p1+p2), 0.15):
+            for p4 in np.arange(0, 1-(p1+p2+p3), 0.10):
+                for p5 in np.arange(0, 1-(p1+p2+p3+p4), 0.05):
+                    p6 = 1-(p1+p2+p3+p4+p5)
+                    prob_vector = [p1,p2,p3,p4,p5,p6]
+                    if np.count_nonzero(prob_vector) > 4:
+#prob_vector = [1/6 for i in range(6)]
+                        results = rs.compare_methods(methods, ("UUP", prob_vector), printing_wanted=True, m=3)
+                        unpack_and_save_results(results, methods, ("UUP", enum, prob_vector), m=3)
+                        enum+=1
 
 #rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)

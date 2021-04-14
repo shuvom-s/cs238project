@@ -532,7 +532,7 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
     full_ballots = [ ]
 
     dist_ID = dist_type[0]
-    if dist_ID not in ["uniform","geometric","hypersphere","polya_eggenberger"]:
+    if dist_ID not in ["uniform","geometric","hypersphere","polya_eggenberger", "UUP"]:
         print("Illegal distribution descriptor for random profile generator:",dist_ID)
         sys.exit()
     #print("the dist_ID is: ", dist_ID)
@@ -611,6 +611,17 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
             weights[ballot_id] += alpha
             full_ballots.append(ballot_dict[ballot_id])
         print(full_ballots)
+    
+    elif dist_ID == "UUP":
+        prob_vector = dist_type[1]
+        ballots = itertools.permutations(A)
+        all_ballots = [list(ballot) for ballot in ballots]
+        print(all_ballots)
+        for i in range(ballot_count):
+            ballot = random.choices(all_ballots, prob_vector)[0]
+            full_ballots.append(ballot)
+        print(full_ballots)
+        #print(ballots)
 
     # truncate ballots if desired
     P = { }
@@ -1435,7 +1446,7 @@ def agree(x,y):
         if yj in xset: return True
     return False
 
-def compare_methods(qs, ballot_distribution, printing_wanted=True):
+def compare_methods(qs, ballot_distribution, m=5, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD).
     qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1444,7 +1455,7 @@ def compare_methods(qs, ballot_distribution, printing_wanted=True):
     (Currently we do not filter out those profiles having a Condorcet winner.)
     """
     election_ID = "compare"
-    m = 5                            # number of candidates
+    #m = 5                            # number of candidates
     trials = 10000                 # number of simulated elections
     ballot_count = 100               # ballots per simulated election
     #ballot_distribution = ("hypersphere",3)   # points on a sphere
@@ -1487,6 +1498,7 @@ def compare_methods(qs, ballot_distribution, printing_wanted=True):
                                ballot_lengths,
                                seed
                                )
+            print(P)
             has_condorcet = (Condorcet_winner(A,P,params,election_ID,
                                                printing_wanted=False) != None)
             if condorcet_OK or not has_condorcet:
