@@ -46,6 +46,9 @@ import string
 import sys
 import itertools
 import random
+import playground as pg
+import numpy as np
+import pandas as pd
 
 import game_cvxopt                  # LP and QP solvers for two-person zero-sum games
 
@@ -1475,7 +1478,7 @@ def extract_alts(filename):
     return sorted(vec)
 
 
-def evaluate_methods_real(qs, list_fns, printing_wanted=True):
+def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD), evaluated on
     real-world data. qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1483,7 +1486,17 @@ def evaluate_methods_real(qs, list_fns, printing_wanted=True):
     are extracted from the data in list_fns, so the function can be run on one
     or multiple elections at once.
     """
-    number_condorcet = 0
+
+    number_condorcet_total = 0
+    number_mixed_total = 0
+    Nagree_total = { }
+    Nmargins_total = {  }
+    iter = 0
+
+    # make directory if it doesn't exist
+    save_path = "results/real_data/" + data_type + "/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
     for fn in list_fns:
         election_ID = "compare"
@@ -1503,6 +1516,7 @@ def evaluate_methods_real(qs, list_fns, printing_wanted=True):
             print("Allow profiles with Condorcet winners:",condorcet_OK)
 
         num_optimal_mixed_strategy_unique = 0
+        number_condorcet = 0
         Nagree = { }
         Nprefs = { }
         Nmargins = { }
@@ -1550,20 +1564,48 @@ def evaluate_methods_real(qs, list_fns, printing_wanted=True):
                     Nprefs[qiname,qjname]+=prefs[w[i],w[j]]
                     Nmargins[qiname,qjname]+=margins[w[i],w[j]]
 
-        print("--------------------------------------------------------------------------------------")
-        print(fn)
-        print("number having Condorcet winner = ", number_condorcet)
-        print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
-        method_names = [ qname for (qname,q) in qs ]
-        print("Nagree:")
-        print(Nagree)
-        print_matrix(method_names,Nagree)
-        print("Nprefs:")
-        print(Nprefs)
-        print_matrix(method_names,Nprefs)
-        print("Nmargins:")
-        print(Nmargins)
-        print_matrix(method_names,Nmargins)
+        # num_optimal_mixed_strategy_unique, number_condorcet are 0 or 1
+        # n_condorcet, n_opt_strat_unique, Nagree, Nmargins = results[0], results[1], results[2], results[3]
+        methods_names_only = [method[0] for method in qs]
+
+        # make dataframes
+        df_agree = pg.convert_to_dataframe(Nagree, methods_names_only)
+        df_margins = pg.convert_to_dataframe(Nmargins, methods_names_only)
+        df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
+        df_condorcet.loc[len(df_condorcet)] = [number_condorcet, num_optimal_mixed_strategy_unique]
+
+        # TODO fix: harcoded for netflix dataset filenames
+        save_fn = fn[22:25]
+
+        # save dataframes
+        save_agree = save_path + save_fn + "_" + "Nagree.csv"
+        save_margins = save_path + save_fn + "_" + "Nmargins.csv"
+        save_condorcet = save_path + save_fn + "_" + "condorcet.csv"
+        df_agree.to_csv(save_agree)
+        df_margins.to_csv(save_margins)
+        df_condorcet.to_csv(save_condorcet)
+
+        number_condorcet_total += number_condorcet
+        number_mixed_total += num_optimal_mixed_strategy_unique
+        if (iter == 0):
+            Nagree_total = df_agree
+            Nmargins_total = df_margins
+        else: 
+            Nagree_total = Nagree_total + df_agree
+            Nmargins_total = Nmargins_total + df_margins
+
+        iter += 1
+
+    save_condorcet = save_path + "agg_" + "condorcet.csv"
+    df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
+    df_condorcet.loc[len(df_condorcet)] = [number_condorcet_total, number_mixed_total]
+    df_condorcet.to_csv(save_condorcet)
+
+    save_agree = save_path + "agg_" + "Nagree.csv"
+    save_margins = save_path + "agg_" + "Nmargins.csv"
+    Nagree_total.to_csv(save_agree)
+    Nmargins_total.to_csv(save_margins)
+
 
 def compare_methods(qs, ballot_distribution, printing_wanted=True):
     """
