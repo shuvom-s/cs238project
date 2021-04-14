@@ -64,10 +64,9 @@ def unpack_and_save_results(results, methods, distribution):
 
 
 
-#methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
-#    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
-#    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
-methods = [("plurality", rs.plurality_winner), ("gt", rs.gt_winner)]
+methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
+   ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
+   ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
 #ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
 #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
