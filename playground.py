@@ -64,19 +64,19 @@ def unpack_and_save_results(results, methods, distribution):
 
 
 
-methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
-   ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
-   ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+# methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
+#    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
+#    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
-#ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
-#    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
-#    ("uniform", )]
+# #ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
+# #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
+# #    ("uniform", )]
 
-ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
-    ("polya_eggenberger", 5), ("polya_eggenberger", 10),]
-for ballot_distribution in ballot_distributions:
-#results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
-    results = rs.compare_methods(methods, ballot_distribution, printing_wanted=True)
-    unpack_and_save_results(results, methods, ballot_distribution)
+# ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
+#     ("polya_eggenberger", 5), ("polya_eggenberger", 10),]
+# for ballot_distribution in ballot_distributions:
+# #results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
+#     results = rs.compare_methods(methods, ballot_distribution, printing_wanted=True)
+#     unpack_and_save_results(results, methods, ballot_distribution)
 
-#rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)
+# #rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)

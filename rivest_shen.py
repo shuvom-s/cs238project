@@ -647,6 +647,7 @@ def pairwise_prefs(A,P,params):
         A short ballot contributes nothing for or against the missing candidates.
     This routine also handles equals signs in ballots.
     """
+    iter = 0
     pref = { }
     for x in A:
         for y in A:
@@ -672,6 +673,7 @@ def pairwise_prefs(A,P,params):
             for x in mentioned:
                 for y in remaining:
                     pref[(x,y)] += P[ballot]
+        iter += 1
     return pref
 
 def pairwise_margins(A,P,params):
@@ -1455,8 +1457,9 @@ def extract_profile(filename):
         vector = vector.split(" ")
         count = vector[0]
         vote = vector[1:len(vector)-1]
+        clean_vote = [i for i in vote if i != ""]
         if (len(count) > 0):
-            P[tuple(vote)] = int(count[1:len(count)-1])
+            P[tuple(clean_vote)] = int(count[1:len(count)-1])
     return P
 
 def extract_alts(filename):
@@ -1475,7 +1478,9 @@ def extract_alts(filename):
     # Assume completeness for every vote vector
     vec = vote_vectors[0].split(" ")
     vec = vec[1: len(vec)-1]
-    return sorted(vec)
+    clean_vec = [i for i in vec if i != "="]
+
+    return sorted(clean_vec)
 
 
 def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
@@ -1575,7 +1580,7 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
         df_condorcet.loc[len(df_condorcet)] = [number_condorcet, num_optimal_mixed_strategy_unique]
 
         # TODO fix: harcoded for netflix dataset filenames
-        save_fn = fn[22:25]
+        save_fn = fn[33:35]
 
         # save dataframes
         save_agree = save_path + save_fn + "_" + "Nagree.csv"
