@@ -653,12 +653,14 @@ def pairwise_prefs(A,P,params):
         for y in A:
             pref[(x,y)] = 0
     for ballot in P:
+        #print(ballot)
         remaining = A[:]                  # less-preferred candidates remaining
         mentioned = [ ]                   # candidates mentioned so far
         equivalents = [ ]                 # equivalence class, disjoint from mentioned
         last_x = None
         for x in ballot:
             if x != "=":
+                print(x)
                 remaining.remove(x)
                 if last_x == "=":
                     equivalents.append(x)
@@ -1477,13 +1479,12 @@ def extract_alts(filename):
 
     # Assume completeness for every vote vector
     vec = vote_vectors[0].split(" ")
-    vec = vec[1: len(vec)-1]
-    clean_vec = [i for i in vec if i != "="]
+    clean_vec = [i for i in vec if i != "=" and i != ""]
 
     return sorted(clean_vec)
 
 
-def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
+def evaluate_methods_real(qs, list_fns, data_type, fn_indent, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD), evaluated on
     real-world data. qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1504,6 +1505,7 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
         os.makedirs(save_path)
 
     for fn in list_fns:
+        print(fn)
         election_ID = "compare"
         params = None                    # no special ballot treatments
         condorcet_OK = True              # proceed even if there is a Condorcet winner
@@ -1580,9 +1582,9 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
         df_condorcet.loc[len(df_condorcet)] = [number_condorcet, num_optimal_mixed_strategy_unique]
 
         # TODO fix: harcoded for netflix dataset filenames
-        save_fn = fn[33:35]
+        save_fn = fn[fn_indent:fn_indent+2]
 
-        # save dataframes
+        #save dataframes
         save_agree = save_path + save_fn + "_" + "Nagree.csv"
         save_margins = save_path + save_fn + "_" + "Nmargins.csv"
         save_condorcet = save_path + save_fn + "_" + "condorcet.csv"

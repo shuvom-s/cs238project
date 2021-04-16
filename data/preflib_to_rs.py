@@ -1,13 +1,11 @@
 '''
 	File: 	preflib_to_rs.py
 	Author:	Sahana Srinivasan and Shuvom Sadhuka
-	Date:	April 14, 2021
-	About
-	--------------------
-	This file contains a set of useful modules for converting PrefLib files without strict ordering
-	(aka that have tied rankings) to strictly ordered ballots. To convert a ballot with tied
-	rankings to one with only strict ordering, for every set of candidates tied at a certain rank in a ballot,
-	randomly shuffle them, and use that shuffled order as the ranking only among the tied candidates.
+	Date:	April 10, 2021
+About
+--------------------
+	This file contains a set of useful modules for converting PrefLib files 
+	to ballots accepted by the Rivest and Shen's voting systems code.
 
 '''
 
@@ -18,13 +16,13 @@ import copy
 import glob
 
 
-def convert(filename):
+def convert(filename, ext):
 	"""
 	Converts the preflib toc file to a file in the format that Rivest and Shen's
 	GT code will accept. 
 
     Examples of line conversion within the file:
-	   "(3358) 1 2 = 3 = 4 = 5 = 6 = 7 = 8 = 9 = 10"
+	   "3358,1,{2,3,4,5,6,7,8,9,10}"       returns "(3358) 1 2 = 3 = 4 = 5 = 6 = 7 = 8 = 9 = 10"
 	   "17,2,3,1,4,5,6,10,8,9,7"		   returns "(17) 2 3 1 4 5 6 10 8 9 7"
 	   "1,2,3,4,1,6,10,{8,9,5},7"		   returns "(1) 2 3 4 1 6 10 8 = 0 = 5 7"
     """
@@ -61,13 +59,17 @@ def convert(filename):
 				for cand in equal_cands:
 					if cand not in seen:
 						seen.append(cand)
+						if (newline[-1] != " "):
+							newline += " "
 						newline += cand + " = "
 				if newline[len(newline) - 3:] == " = ":
 					newline = newline[:len(newline) - 3]
 				cands = bipart[1].split(",")
 				for cand in cands:
-					if cand not in seen:
+					if cand not in seen and cand != "":
 						seen.append(cand)
+						if (newline[-1] != " "):
+							newline += " "
 						newline += cand + " "
 
 		out.write(newline)
@@ -84,6 +86,7 @@ def convert_files(path, ext):
     """
 
 	for fn in glob.glob(path):
+		print(fn)
 		convert(fn[:-4], ext)
 
-convert_files("**/*.soc", "soc")
+convert_files("**/*.toc", "toc")
