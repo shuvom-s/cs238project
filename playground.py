@@ -77,14 +77,18 @@ methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt"
 
 #ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
 #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
-#    ("uniform", )]
+#    ("uniform", ),]
+ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
+    ("polya_eggenberger", 5), ("polya_eggenberger", 10)]
 
-#ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
-#    ("polya_eggenberger", 5), ("polya_eggenberger", 10),]
-#for ballot_distribution in ballot_distributions:
+for ballot_distribution in ballot_distributions:
+    for m in [3,4,6]:
+        results = rs.compare_methods(methods, ballot_distribution, printing_wanted=True, m=m)
+        unpack_and_save_results(results, methods, ballot_distribution, m=m)
+    #enum+=1
 #results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
 enum = 0
-
+'''
 for p1 in np.arange(0.0, 1.0, 0.25):
     for p2 in np.arange(0, 1-p1, 0.20):
         for p3 in np.arange(0, 1-(p1+p2), 0.15):
@@ -92,10 +96,8 @@ for p1 in np.arange(0.0, 1.0, 0.25):
                 for p5 in np.arange(0, 1-(p1+p2+p3+p4), 0.05):
                     p6 = 1-(p1+p2+p3+p4+p5)
                     prob_vector = [p1,p2,p3,p4,p5,p6]
-                    if np.count_nonzero(prob_vector) > 4:
+                    if np.count_nonzero(prob_vector) > 4:'''
 #prob_vector = [1/6 for i in range(6)]
-                        results = rs.compare_methods(methods, ("UUP", prob_vector), printing_wanted=True, m=3)
-                        unpack_and_save_results(results, methods, ("UUP", enum, prob_vector), m=3)
-                        enum+=1
+                        
 
 #rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)
