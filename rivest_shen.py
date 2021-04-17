@@ -653,14 +653,12 @@ def pairwise_prefs(A,P,params):
         for y in A:
             pref[(x,y)] = 0
     for ballot in P:
-        #print(ballot)
         remaining = A[:]                  # less-preferred candidates remaining
         mentioned = [ ]                   # candidates mentioned so far
         equivalents = [ ]                 # equivalence class, disjoint from mentioned
         last_x = None
         for x in ballot:
             if x != "=":
-                print(x)
                 remaining.remove(x)
                 if last_x == "=":
                     equivalents.append(x)
@@ -1169,7 +1167,7 @@ def gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted=False):
         for j in range(m):
             M[i][j] = margin[A[i],A[j]]
 
-    print(indent+"Using game_cvxopt.qp_solver (quadratic programming --> balanced soln)")
+    #print(indent+"Using game_cvxopt.qp_solver (quadratic programming --> balanced soln)")
     qp_x = game_cvxopt.qp_solver(M)
     print_optimal_mixed_strategy(A,qp_x,printing_wanted)
 
@@ -1188,7 +1186,7 @@ def gt_optimal_mixed_strategy_lp(A,P,params,election_ID,printing_wanted=False):
         for j in range(m):
             M[i][j] = margin[A[i],A[j]]
 
-    print(indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)")
+    #print(indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)")
     lp_x = game_cvxopt.lp_solver(M)
     print_optimal_mixed_strategy(A,lp_x,printing_wanted)
     #print(lp_x)
@@ -1614,7 +1612,7 @@ def evaluate_methods_real(qs, list_fns, data_type, fn_indent, printing_wanted=Tr
     Nmargins_total.to_csv(save_margins)
 
 
-def compare_methods(qs, ballot_distribution, printing_wanted=True):
+def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD).
     qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1623,9 +1621,9 @@ def compare_methods(qs, ballot_distribution, printing_wanted=True):
     (Currently we do not filter out those profiles having a Condorcet winner.)
     """
     election_ID = "compare"
-    m = 5                            # number of candidates
-    trials = 10000                 # number of simulated elections
-    ballot_count = 100               # ballots per simulated election
+    m = num_cand                     # number of candidates
+    trials = 10000                   # number of simulated elections
+    ballot_count = num_voters        # ballots per simulated election
     #ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
     #ballot_distribution = ("geometric", 3)
@@ -1702,20 +1700,23 @@ def compare_methods(qs, ballot_distribution, printing_wanted=True):
                     Nmargins[qiname,qjname]+=margins[w[i],w[j]]
 
     print("--------------------------------------------------------------------------------------")
-    print("\nnumber of trials = ",trials)
-    print("number of profiles generated = ", trial_counter)
-    print("number having Condorcet winner = ", number_condorcet)
-    print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
-    method_names = [ qname for (qname,q) in qs ]
-    print("Nagree:")
-    print(Nagree)
-    print_matrix(method_names,Nagree)
-    print("Nprefs:")
-    print(Nprefs)
-    print_matrix(method_names,Nprefs)
-    print("Nmargins:")
-    print(Nmargins)
-    print_matrix(method_names,Nmargins)
+    print("dimension: " + str(ballot_distribution[1]))
+    print("number of candidates: " + str(num_cand))
+    print("number of voters: " + str(num_voters))
+    # print("\nnumber of trials = ",trials)
+    # print("number of profiles generated = ", trial_counter)
+    # print("number having Condorcet winner = ", number_condorcet)
+    # print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
+    # method_names = [ qname for (qname,q) in qs ]
+    # print("Nagree:")
+    # print(Nagree)
+    # print_matrix(method_names,Nagree)
+    # print("Nprefs:")
+    # print(Nprefs)
+    # print_matrix(method_names,Nprefs)
+    # print("Nmargins:")
+    # print(Nmargins)
+    # print_matrix(method_names,Nmargins)
     return (number_condorcet, num_optimal_mixed_strategy_unique, Nagree, Nmargins)
 
 
