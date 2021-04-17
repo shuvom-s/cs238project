@@ -71,9 +71,9 @@ def unpack_and_save_results(results, methods, distribution, m=5):
 
 
 
-methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
-   ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
-   ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+# methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
+#    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
+#    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
 #ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
 #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
@@ -100,4 +100,4 @@ for p1 in np.arange(0.0, 1.0, 0.25):
 #prob_vector = [1/6 for i in range(6)]
                         
 
-#rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)
+# #rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)

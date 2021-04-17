@@ -658,6 +658,7 @@ def pairwise_prefs(A,P,params):
         A short ballot contributes nothing for or against the missing candidates.
     This routine also handles equals signs in ballots.
     """
+    iter = 0
     pref = { }
     for x in A:
         for y in A:
@@ -683,6 +684,7 @@ def pairwise_prefs(A,P,params):
             for x in mentioned:
                 for y in remaining:
                     pref[(x,y)] += P[ballot]
+        iter += 1
     return pref
 
 def pairwise_margins(A,P,params):
@@ -1176,7 +1178,7 @@ def gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted=False):
         for j in range(m):
             M[i][j] = margin[A[i],A[j]]
 
-    print(indent+"Using game_cvxopt.qp_solver (quadratic programming --> balanced soln)")
+    #print(indent+"Using game_cvxopt.qp_solver (quadratic programming --> balanced soln)")
     qp_x = game_cvxopt.qp_solver(M)
     print_optimal_mixed_strategy(A,qp_x,printing_wanted)
 
@@ -1195,7 +1197,7 @@ def gt_optimal_mixed_strategy_lp(A,P,params,election_ID,printing_wanted=False):
         for j in range(m):
             M[i][j] = margin[A[i],A[j]]
 
-    print(indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)")
+    #print(indent+"Using game_cvxopt.lp_solver (linear programming --> soln may be unbalanced)")
     lp_x = game_cvxopt.lp_solver(M)
     print_optimal_mixed_strategy(A,lp_x,printing_wanted)
     #print(lp_x)
@@ -1466,8 +1468,9 @@ def extract_profile(filename):
         vector = vector.split(" ")
         count = vector[0]
         vote = vector[1:len(vector)-1]
+        clean_vote = [i for i in vote if i != ""]
         if (len(count) > 0):
-            P[tuple(vote)] = int(count[1:len(count)-1])
+            P[tuple(clean_vote)] = int(count[1:len(count)-1])
     return P
 
 def extract_alts(filename):
@@ -1485,11 +1488,12 @@ def extract_alts(filename):
 
     # Assume completeness for every vote vector
     vec = vote_vectors[0].split(" ")
-    vec = vec[1: len(vec)-1]
-    return sorted(vec)
+    clean_vec = [i for i in vec if i != "=" and i != ""]
+
+    return sorted(clean_vec)
 
 
-def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
+def evaluate_methods_real(qs, list_fns, data_type, fn_indent, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD), evaluated on
     real-world data. qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1510,6 +1514,7 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
         os.makedirs(save_path)
 
     for fn in list_fns:
+        print(fn)
         election_ID = "compare"
         params = None                    # no special ballot treatments
         condorcet_OK = True              # proceed even if there is a Condorcet winner
@@ -1586,9 +1591,9 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
         df_condorcet.loc[len(df_condorcet)] = [number_condorcet, num_optimal_mixed_strategy_unique]
 
         # TODO fix: harcoded for netflix dataset filenames
-        save_fn = fn[22:25]
+        save_fn = fn[fn_indent:fn_indent+2]
 
-        # save dataframes
+        #save dataframes
         save_agree = save_path + save_fn + "_" + "Nagree.csv"
         save_margins = save_path + save_fn + "_" + "Nmargins.csv"
         save_condorcet = save_path + save_fn + "_" + "condorcet.csv"
@@ -1618,7 +1623,7 @@ def evaluate_methods_real(qs, list_fns, data_type, printing_wanted=True):
     Nmargins_total.to_csv(save_margins)
 
 
-def compare_methods(qs, ballot_distribution, printing_wanted=True, m=5):
+def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_wanted=True):
     """
     Compare methods in qs to each other (and to GT and GTD).
     qs contains a list of (qname, q) pairs, where qname is a string giving
@@ -1627,9 +1632,9 @@ def compare_methods(qs, ballot_distribution, printing_wanted=True, m=5):
     (Currently we do not filter out those profiles having a Condorcet winner.)
     """
     election_ID = "compare"
-    #m = 5                            # number of candidates
-    trials = 10000                 # number of simulated elections
-    ballot_count = 100               # ballots per simulated election
+    m = num_cand                     # number of candidates
+    trials = 10000                   # number of simulated elections
+    ballot_count = num_voters        # ballots per simulated election
     #ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
     #ballot_distribution = ("geometric", 3)
@@ -1707,20 +1712,23 @@ def compare_methods(qs, ballot_distribution, printing_wanted=True, m=5):
                     Nmargins[qiname,qjname]+=margins[w[i],w[j]]
 
     print("--------------------------------------------------------------------------------------")
-    print("\nnumber of trials = ",trials)
-    print("number of profiles generated = ", trial_counter)
-    print("number having Condorcet winner = ", number_condorcet)
-    print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
-    method_names = [ qname for (qname,q) in qs ]
-    print("Nagree:")
-    print(Nagree)
-    print_matrix(method_names,Nagree)
-    print("Nprefs:")
-    print(Nprefs)
-    print_matrix(method_names,Nprefs)
-    print("Nmargins:")
-    print(Nmargins)
-    print_matrix(method_names,Nmargins)
+    print("dimension: " + str(ballot_distribution[1]))
+    print("number of candidates: " + str(num_cand))
+    print("number of voters: " + str(num_voters))
+    # print("\nnumber of trials = ",trials)
+    # print("number of profiles generated = ", trial_counter)
+    # print("number having Condorcet winner = ", number_condorcet)
+    # print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
+    # method_names = [ qname for (qname,q) in qs ]
+    # print("Nagree:")
+    # print(Nagree)
+    # print_matrix(method_names,Nagree)
+    # print("Nprefs:")
+    # print(Nprefs)
+    # print_matrix(method_names,Nprefs)
+    # print("Nmargins:")
+    # print(Nmargins)
+    # print_matrix(method_names,Nmargins)
     return (number_condorcet, num_optimal_mixed_strategy_unique, Nagree, Nmargins)
 
 
