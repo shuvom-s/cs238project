@@ -73,12 +73,13 @@ methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt"
    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
-voters_range = [100, 250, 500, 1000, 5000, 10000]
-for dim in range(4, 5):
-    for num_cand in range(3, 15):
-        for num_voters in voters_range:
-            results = rs.compare_methods(methods, ("hypersphere", dim), num_cand, num_voters, printing_wanted=False)
-            unpack_and_save_results(results, methods, ("hypersphere", dim), num_cand, num_voters)
+#voters_range = [100, 250, 500, 1000, 5000, 10000]
+voters_range = [1500, 2500, 7500, 15000]
+dim = 3
+for num_voters in voters_range:
+    for num_cand in range(3, 11):
+        results = rs.compare_methods(methods, ("hypersphere", dim), num_cand, num_voters, printing_wanted=False)
+        unpack_and_save_results(results, methods, ("hypersphere", dim), num_cand, num_voters)
 
 # ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
 #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
