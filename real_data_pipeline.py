@@ -2,13 +2,15 @@ import rivest_shen as rs
 import glob
 
 
-# generate list of netflix files
-fns = []
-for fn in glob.glob("**/*converted.soc"):
-    fns.append(fn)
-
 methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
     ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
     ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
-rs.evaluate_methods_real(methods, fns, "netflix", printing_wanted=False)
+
+datasets = ["burlington", "aspen", "vermont", "sanleandro", "pierce", "oakland"]
+indents = [31, 26, 28, 31, 27, 28]
+for ind in range(len(datasets)):
+    fns = []
+    for fn in glob.glob("data/" + datasets[ind] + "/*converted.toc"):
+        fns.append(fn)
+    rs.evaluate_methods_real(methods, fns, datasets[ind], indents[ind], printing_wanted=False)
