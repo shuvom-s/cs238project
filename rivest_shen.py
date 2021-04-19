@@ -1684,7 +1684,7 @@ def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_want
                                ballot_lengths,
                                seed
                                )
-            print(P)
+            #print(P)
             has_condorcet = (Condorcet_winner(A,P,params,election_ID,
                                                printing_wanted=False) != None)
             if condorcet_OK or not has_condorcet:

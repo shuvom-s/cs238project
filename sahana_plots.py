@@ -128,8 +128,8 @@ def netflix_nc_plots():
 
 # ONE PLOT FOR 3D HYPERSPHERE FOR VOTERS VS % CONDORCET - ONE LINE PER # CANDIDATES
 def plot_hypersphere_condorcet():
-    xs = [100, 250, 500, 1000, 5000, 10000]
-    ys = [[0 for i in range(6)] for j in range(12)]
+    xs = [100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000]
+    ys = [[0 for i in range(len(xs))] for j in range(12)]
     for m in range(3, 11):
         for ind in range(len(xs)):
             x = xs[ind]
@@ -147,28 +147,32 @@ def plot_hypersphere_condorcet():
     plt.legend()
     plt.show()
 
-# plot_hypersphere_condorcet
+plot_hypersphere_condorcet()
+
 
 
 # ONE PLOT PER VOTING SYSTEM FOR 3D HYPERSPHERE FOR VOTERS VS ADV MARGIN - ONE LINE PER # CANDIDATES
-for s in range(len(systems)):
-    system = systems[s]
-    xs = [100, 250, 500, 1000, 5000, 10000]
-    ys = [[0 for i in range(6)] for j in range(12)]
+def plot_hypersphere_margin():
+    for s in range(len(systems)):
+        system = systems[s]
+        xs = [100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000]
+        ys = [[0 for i in range(len(xs))] for j in range(12)]
 
-    for m in range(3, 11):
-        for ind in range(len(xs)):
-            x = xs[ind]
-            margin_df = pd.read_csv("results/distributions/hypersphere/d_3/m_" + str(m) + "/v_" + str(x) + "/Nmargins.csv")
-            margin = margin_df.loc[2][system]
-            num_voters = x*10000
-            ys[m][ind] = margin/num_voters
+        for m in range(3, 11):
+            for ind in range(len(xs)):
+                x = xs[ind]
+                margin_df = pd.read_csv("results/distributions/hypersphere/d_3/m_" + str(m) + "/v_" + str(x) + "/Nmargins.csv")
+                margin = margin_df.loc[2][system]
+                num_voters = x*10000
+                ys[m][ind] = margin/num_voters
 
-    for m in range(3, 11):
-        plt.plot(xs, ys[m], label = str(m) + " candidates")
-        plt.xlabel("Number of Voters")
-        plt.ylabel("Margin " + system)
+        for m in range(3, 11):
+            plt.plot(xs, ys[m], label = str(m) + " candidates")
+            plt.xlabel("Number of Voters")
+            plt.ylabel("Margin " + system)
 
-    plt.title("Margin by # Voters, # Candidates for GT vs. " + system)
-    plt.legend()
-    plt.show()
+        plt.title("Margin by # Voters, # Candidates for GT vs. " + system)
+        plt.legend()
+        plt.show()
+
+# plot_hypersphere_margin
