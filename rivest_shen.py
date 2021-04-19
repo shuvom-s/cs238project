@@ -46,7 +46,7 @@ import string
 import sys
 import itertools
 import random
-#import playground as pg
+import playground as pg
 import numpy as np
 import pandas as pd
 
@@ -1584,43 +1584,52 @@ def evaluate_methods_real(qs, list_fns, data_type, fn_indent, printing_wanted=Tr
         # n_condorcet, n_opt_strat_unique, Nagree, Nmargins = results[0], results[1], results[2], results[3]
         methods_names_only = [method[0] for method in qs]
 
-        # make dataframes
-        df_agree = pg.convert_to_dataframe(Nagree, methods_names_only)
-        df_margins = pg.convert_to_dataframe(Nmargins, methods_names_only)
-        df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
-        df_condorcet.loc[len(df_condorcet)] = [number_condorcet, num_optimal_mixed_strategy_unique]
+        # input = open(fn[0:-14] + ".soc", "r")
+        # text = input.read()
+        # lines = text.split("\n")
+        # num_alts = lines[0]
+        # lines = lines[int(num_alts)+1:len(lines)-1]
+        # first_line = lines[0].split(",")
+        # count = float(first_line[0])
+        # print(count)
 
-        # TODO fix: harcoded for netflix dataset filenames
-        save_fn = fn[fn_indent:fn_indent+2]
+        # make dataframes
+        #df_agree = pg.convert_to_dataframe(Nagree, methods_names_only)
+        df_margins = pg.convert_to_dataframe(Nmargins, methods_names_only)
+        #df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
+        #df_condorcet.loc[len(df_condorcet)] = [number_condorcet, num_optimal_mixed_strategy_unique]
+
+        # TODO fix: harcoded for netflix noncondorcet datasets
+        save_fn = str(iter)
 
         #save dataframes
-        save_agree = save_path + save_fn + "_" + "Nagree.csv"
+        #save_agree = save_path + save_fn + "_" + "Nagree.csv"
         save_margins = save_path + save_fn + "_" + "Nmargins.csv"
-        save_condorcet = save_path + save_fn + "_" + "condorcet.csv"
-        df_agree.to_csv(save_agree)
+        #save_condorcet = save_path + save_fn + "_" + "condorcet.csv"
+        #df_agree.to_csv(save_agree)
         df_margins.to_csv(save_margins)
-        df_condorcet.to_csv(save_condorcet)
+        #df_condorcet.to_csv(save_condorcet)
 
-        number_condorcet_total += number_condorcet
-        number_mixed_total += num_optimal_mixed_strategy_unique
+        #number_condorcet_total += number_condorcet
+        #number_mixed_total += num_optimal_mixed_strategy_unique
         if (iter == 0):
-            Nagree_total = df_agree
+            #Nagree_total = df_agree
             Nmargins_total = df_margins
         else: 
-            Nagree_total = Nagree_total + df_agree
+            #Nagree_total = Nagree_total + df_agree
             Nmargins_total = Nmargins_total + df_margins
 
         iter += 1
 
-    save_condorcet = save_path + "agg_" + "condorcet.csv"
-    df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
-    df_condorcet.loc[len(df_condorcet)] = [number_condorcet_total, number_mixed_total]
-    df_condorcet.to_csv(save_condorcet)
+    #save_condorcet = save_path + "agg_" + "condorcet.csv"
+    #df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
+    #df_condorcet.loc[len(df_condorcet)] = [number_condorcet_total, number_mixed_total]
+    #df_condorcet.to_csv(save_condorcet)
 
-    save_agree = save_path + "agg_" + "Nagree.csv"
-    save_margins = save_path + "agg_" + "Nmargins.csv"
-    Nagree_total.to_csv(save_agree)
-    Nmargins_total.to_csv(save_margins)
+    #save_agree = save_path + "agg_" + "Nagree.csv"
+    #save_margins = save_path + "agg_" + "Nmargins.csv"
+    #Nagree_total.to_csv(save_agree)
+    #Nmargins_total.to_csv(save_margins)
 
 
 def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_wanted=True):
@@ -1675,7 +1684,7 @@ def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_want
                                ballot_lengths,
                                seed
                                )
-            print(P)
+            #print(P)
             has_condorcet = (Condorcet_winner(A,P,params,election_ID,
                                                printing_wanted=False) != None)
             if condorcet_OK or not has_condorcet:
