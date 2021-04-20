@@ -44,7 +44,7 @@ def unpack_and_save_results(results, methods, distribution, m=5):
     df_condorcet.loc[len(df_condorcet)] = [n_condorcet, n_opt_strat_unique]
 
     # make directory if it doesn't exist
-    save_path = "results/distributions/" + str(distribution[0]) + "/"
+    save_path = "results/distributions_temp/" + str(distribution[0]) + "/"
     if distribution[0] == "geometric" or distribution[0] == "hypersphere":
         save_path += "d_" + str(distribution[1]) + "/"
     if distribution[0] == "polya_eggenberger":
@@ -71,19 +71,21 @@ def unpack_and_save_results(results, methods, distribution, m=5):
 
 
 
-# methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
-#    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
-#    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
+    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
+    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
 
 #ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \
 #    ("hypersphere", 2), ("hypersphere", 3), ("hypersphere", 4), \
 #    ("uniform", ),]
-ballot_distributions = [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
-    ("polya_eggenberger", 5), ("polya_eggenberger", 10)]
+#ballot_distributions += [("polya_eggenberger", 1), ("polya_eggenberger", 2), \
+#    ("polya_eggenberger", 5), ("polya_eggenberger", 10)]
+ballot_distributions = [("hypersphere", 3)]
 
 for ballot_distribution in ballot_distributions:
-    for m in [3,4,6]:
-        results = rs.compare_methods(methods, ballot_distribution, printing_wanted=True, m=m)
+    for m in [3,4,5,6,7,8,9,10]:
+        #print(ballot_distribution)
+        results = rs.compare_methods(methods, ballot_distribution, num_cand=m, num_voters=25000, printing_wanted=True)
         unpack_and_save_results(results, methods, ballot_distribution, m=m)
     #enum+=1
 #results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
