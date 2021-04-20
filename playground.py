@@ -80,11 +80,11 @@ methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt"
 
 #ballot_distributions = [("uniform", )]
 
-ballot_distributions = [("polya_eggenberger", 2), \
-    ("polya_eggenberger", 5), ("polya_eggenberger", 10)]
+ballot_distributions = [("polya_eggenberger", 1)]
 
 for ballot_distribution in ballot_distributions:
-    for m in [3,4,5,6,7,8,9,10]:
+    for m in [9]:
+    #for m in [3,4,5,6,7,8,9]:
         #print(ballot_distribution)
         results = rs.compare_methods(methods, ballot_distribution, num_cand=m, num_voters=1000, printing_wanted=False)
         unpack_and_save_results(results, methods, ballot_distribution, m=m)
