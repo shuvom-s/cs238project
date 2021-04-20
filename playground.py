@@ -87,18 +87,18 @@ for ballot_distribution in ballot_distributions:
         #print(ballot_distribution)
         results = rs.compare_methods(methods, ballot_distribution, num_cand=m, num_voters=25000, printing_wanted=True)
         unpack_and_save_results(results, methods, ballot_distribution, m=m)
-    #enum+=1
-#results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
+#     #enum+=1
+# #results = rs.compare_methods(methods, ("uniform",), printing_wanted=True)
 enum = 0
-'''
-for p1 in np.arange(0.0, 1.0, 0.25):
-    for p2 in np.arange(0, 1-p1, 0.20):
-        for p3 in np.arange(0, 1-(p1+p2), 0.15):
-            for p4 in np.arange(0, 1-(p1+p2+p3), 0.10):
-                for p5 in np.arange(0, 1-(p1+p2+p3+p4), 0.05):
-                    p6 = 1-(p1+p2+p3+p4+p5)
-                    prob_vector = [p1,p2,p3,p4,p5,p6]
-                    if np.count_nonzero(prob_vector) > 4:'''
+# '''
+# for p1 in np.arange(0.0, 1.0, 0.25):
+#     for p2 in np.arange(0, 1-p1, 0.20):
+#         for p3 in np.arange(0, 1-(p1+p2), 0.15):
+#             for p4 in np.arange(0, 1-(p1+p2+p3), 0.10):
+#                 for p5 in np.arange(0, 1-(p1+p2+p3+p4), 0.05):
+#                     p6 = 1-(p1+p2+p3+p4+p5)
+#                     prob_vector = [p1,p2,p3,p4,p5,p6]
+#                     if np.count_nonzero(prob_vector) > 4:'''
 #prob_vector = [1/6 for i in range(6)]
                         
 
