@@ -127,7 +127,7 @@ def netflix_nc_plots():
 # netflix_nc_plots()
 
 # ONE PLOT FOR 3D HYPERSPHERE FOR VOTERS VS % CONDORCET - ONE LINE PER # CANDIDATES
-def plot_hypersphere_condorcet():
+def plot_hypersphere_condorcet(margins=False):
     xs = [100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000]
     ys = [[0 for i in range(len(xs))] for j in range(12)]
     for m in range(3, 11):
