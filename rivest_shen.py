@@ -46,7 +46,6 @@ import string
 import sys
 import itertools
 import random
-import playground as pg
 import numpy as np
 import pandas as pd
 
@@ -611,10 +610,10 @@ def random_profile(A,ballot_count,dist_type,length_range,seed,printing_wanted=Fa
         for i in range(ballot_count):
             #print(ballot_ids)
             ballot_id = random.choices(ballot_ids, weights, k=1)[0]
-            print(ballot_id)
+            #print(ballot_id)
             weights[ballot_id] += alpha
             full_ballots.append(ballot_dict[ballot_id])
-        print(full_ballots)
+        #print(full_ballots)
     
     elif dist_ID == "UUP":
         prob_vector = dist_type[1]
@@ -1642,7 +1641,7 @@ def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_want
     """
     election_ID = "compare"
     m = num_cand                     # number of candidates
-    trials = 10000                   # number of simulated elections
+    trials = 1000#0                   # number of simulated elections
     ballot_count = num_voters        # ballots per simulated election
     #ballot_distribution = ("hypersphere",3)   # points on a sphere
     #ballot_distribution = ("uniform", )
@@ -1721,7 +1720,8 @@ def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_want
                     Nmargins[qiname,qjname]+=margins[w[i],w[j]]
 
     print("--------------------------------------------------------------------------------------")
-    print("dimension: " + str(ballot_distribution[1]))
+    if (ballot_distribution[0] != "uniform"):
+        print("dimension: " + str(ballot_distribution[1]))
     print("number of candidates: " + str(num_cand))
     print("number of voters: " + str(num_voters))
     # print("\nnumber of trials = ",trials)
