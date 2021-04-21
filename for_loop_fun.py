@@ -93,3 +93,7 @@ for num_voters in voters_range:
 #     unpack_and_save_results(results, methods, ballot_distribution)
 
 # #rs.runoff("gt", rs.gt_winner, "IRV", rs.IRV_winner, printing_wanted=False)
+
+# TODO go through IRV for all num candidates, all num voters
+# re-run and get set of advantages accrued at each (cand, voter) combo among condorcet-winner elections and non-condorcet ones
+# should be a plot with 8 colors for the # candidates, x is voters, y is advantage, shape is condorcet or non-condorcet (scatterplot)
