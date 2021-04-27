@@ -34,17 +34,21 @@ def unpack_and_save_results(results, methods, distribution, num_cand, num_voters
     B   -100  0
     once saved.
     """
-    n_condorcet, n_opt_strat_unique, Nagree, Nmargins = results[0], results[1], results[2], results[3]
+    n_condorcet, n_opt_strat_unique, Nagree, Nmargins, NagreeCondorcet, NmarginsCondorcet = results[0], results[1], results[2], results[3], results[4], results[5]
     methods_names_only = [method[0] for method in methods]
 
     # make dataframes
     df_agree = convert_to_dataframe(Nagree, methods_names_only)
     df_margins = convert_to_dataframe(Nmargins, methods_names_only)
+    df_marginsCondorcet = convert_to_dataframe(NmarginsCondorcet, methods_names_only)
+    df_agreeCondorcet = convert_to_dataframe(NagreeCondorcet, methods_names_only)
     df_condorcet = pd.DataFrame(columns = ['n_condorcet', 'n_opt_strat_unique'])
     df_condorcet.loc[len(df_condorcet)] = [n_condorcet, n_opt_strat_unique]
 
+    # changed for deeper condorcet analysis
+
     # make directory if it doesn't exist
-    save_path = "results/distributions/" + str(distribution[0]) + "/"
+    save_path = "results/distributions/" + str(distribution[0]) + "/condorcet/" # changed for condorcet adv
     if distribution[0] == "geometric" or distribution[0] == "hypersphere":
         save_path += "d_" + str(distribution[1]) + "/"
     if distribution[0] == "polya_eggenberger":
@@ -61,24 +65,32 @@ def unpack_and_save_results(results, methods, distribution, num_cand, num_voters
     save_agree = save_path + "Nagree.csv"
     save_margins = save_path + "Nmargins.csv"
     save_condorcet = save_path + "condorcet.csv"
+    save_agcondorcet = save_path + "Nagree_condorcet.csv"
+    save_margincondorcet = save_path + "Nmargins_condorcet.csv"
 
     # save dataframes
     df_agree.to_csv(save_agree)
     df_margins.to_csv(save_margins)
+    df_marginsCondorcet.to_csv(save_margincondorcet)
+    df_agreeCondorcet.to_csv(save_agcondorcet)
     df_condorcet.to_csv(save_condorcet)
 
 
 
+# methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
+#    ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
+#    ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+   
+   
 methods = [("Borda", rs.Borda_winner), ("plurality", rs.plurality_winner), ("gt", rs.gt_winner), \
-   ("minimax", rs.minimax_winner), ("gtd", rs.gtd_winner), \
-   ("Schulze", rs.Schulze_winner), ("IRV", rs.IRV_winner)]
+   ("IRV", rs.IRV_winner)]
 
 #voters_range = [100, 250, 500, 1000, 5000, 10000]
-voters_range = [1500, 2500, 7500, 15000]
+voters_range = [100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000]
 dim = 3
 for num_voters in voters_range:
     for num_cand in range(3, 11):
-        results = rs.compare_methods(methods, ("hypersphere", dim), num_cand, num_voters, printing_wanted=False)
+        results = rs.condorcet_adv(methods, ("hypersphere", dim), num_cand, num_voters, printing_wanted=False)
         unpack_and_save_results(results, methods, ("hypersphere", dim), num_cand, num_voters)
 
 # ballot_distributions = [("geometric", 2), ("geometric", 3), ("geometric", 4), \

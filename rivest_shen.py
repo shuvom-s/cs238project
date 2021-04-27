@@ -1630,6 +1630,120 @@ def evaluate_methods_real(qs, list_fns, data_type, fn_indent, printing_wanted=Tr
     #Nagree_total.to_csv(save_agree)
     #Nmargins_total.to_csv(save_margins)
 
+def condorcet_adv(qs, ballot_distribution, num_cand, num_voters, printing_wanted=True):
+    """
+    Probability of IRV, Borda, Plurality picking the Condorcet winner if there is one, 
+    probability is over the elections with a Condorcet winner, among the 10k total elections.
+    """
+    election_ID = "compare"
+    m = num_cand                     # number of candidates
+    trials = 1000#0                   # number of simulated elections
+    ballot_count = num_voters        # ballots per simulated election
+    #ballot_distribution = ("hypersphere",3)   # points on a sphere
+    #ballot_distribution = ("uniform", )
+    #ballot_distribution = ("geometric", 3)
+    ballot_lengths = None            # full ballots wanted
+    params = None                    # no special ballot treatments
+    condorcet_OK = True              # proceed even if there is a Condorcet winner
+
+    A = list(string.ascii_uppercase[:m])   # candidates are 'A' 'B' 'C' ...
+    setup_TB(A,params)               # establish tie-breaker values
+    num_methods = len(qs)
+
+    if printing_wanted:
+        print("Number of candidates =",m)
+        print("Number of ballots per election trial =",ballot_count)
+        print("ballot_distribution:",ballot_distribution)
+        print("ballot min/max lengths:",ballot_lengths)
+        print("Allow profiles with Condorcet winners:",condorcet_OK)
+
+    trial_counter = 0
+    number_condorcet = 0
+    num_optimal_mixed_strategy_unique = 0
+    Nagree = { }
+    NagreeCondorcet = { }
+    Nprefs = { }
+    Nmargins = { }
+    NmarginsCondorcet = { }
+    for (qiname,qi) in qs:
+        for (qjname, qj) in qs:
+            Nagree[qiname,qjname] = 0
+            NagreeCondorcet[qiname, qjname] = 0
+            Nprefs[qiname,qjname] = 0
+            Nmargins[qiname,qjname] = 0
+            NmarginsCondorcet[qiname, qjname] = 0
+    for trial in range(trials):
+        print("Trial {}:".format(trial))
+        # generate random profile
+        while True:
+            trial_counter += 1
+            seed = trial_counter
+            P = random_profile(A,ballot_count,
+                               ballot_distribution,
+                               ballot_lengths,
+                               seed
+                               )
+            #print(P)
+            has_condorcet = (Condorcet_winner(A,P,params,election_ID,
+                                               printing_wanted=False) != None)
+            if condorcet_OK or not has_condorcet:
+                break
+        if printing_wanted:
+            print_profile(P,election_ID)
+        if has_condorcet:
+            number_condorcet += 1
+        prefs = pairwise_prefs(A,P,params)
+        margins = pairwise_margins(A,P,params)
+        # Generate optimal mixed strategy, GT winner, GTD winner
+        lp_p = gt_optimal_mixed_strategy_lp(A,P,params,election_ID,printing_wanted)
+        p = gt_optimal_mixed_strategy(A,P,params,election_ID,printing_wanted)
+        if L1_dist(lp_p,p) < 0.02:
+            num_optimal_mixed_strategy_unique += 1
+            if printing_wanted:
+                print(indent+"LP and QP give same solution to GT")
+        else:
+            if printing_wanted:
+                print(indent+"LP and QP give different solutions to GT")
+        # iterate through all methods
+        w = [ None ] * len(qs)     # for each method, a winner, or a list of winners
+        for (i,(qname, q)) in enumerate(qs):
+            w[i] = q(A,P,params,election_ID,printing_wanted=False)
+        # score each method relative to the other
+        for (i,(qiname, qi)) in enumerate(qs):
+            for (j,(qjname, qj)) in enumerate(qs):
+                # agreement
+                if agree(w[i],w[j]):
+                    Nagree[qiname,qjname] += 1
+                if agree(w[i],w[j]) and has_condorcet:
+                    NagreeCondorcet[qiname,qjname] += 1
+                # preferences and margins
+
+                if type(w[i])==type(str()) and type(w[j])==type(str()):
+                    Nprefs[qiname,qjname]+=prefs[w[i],w[j]]
+                    Nmargins[qiname,qjname]+=margins[w[i],w[j]]
+                    if has_condorcet:
+                        NmarginsCondorcet[qiname,qjname]+=margins[w[i],w[j]]
+
+    print("--------------------------------------------------------------------------------------")
+    if (ballot_distribution[0] != "uniform"):
+        print("dimension: " + str(ballot_distribution[1]))
+    print("number of candidates: " + str(num_cand))
+    print("number of voters: " + str(num_voters))
+    # print("\nnumber of trials = ",trials)
+    # print("number of profiles generated = ", trial_counter)
+    # print("number having Condorcet winner = ", number_condorcet)
+    # print("number of times LP and QP gave same solution to GT = ", num_optimal_mixed_strategy_unique)
+    # method_names = [ qname for (qname,q) in qs ]
+    # print("Nagree:")
+    # print(Nagree)
+    # print_matrix(method_names,Nagree)
+    # print("Nprefs:")
+    # print(Nprefs)
+    # print_matrix(method_names,Nprefs)
+    # print("Nmargins:")
+    # print(Nmargins)
+    # print_matrix(method_names,Nmargins)
+    return (number_condorcet, num_optimal_mixed_strategy_unique, Nagree, Nmargins, NagreeCondorcet, NmarginsCondorcet)
 
 def compare_methods(qs, ballot_distribution, num_cand, num_voters, printing_wanted=True):
     """
